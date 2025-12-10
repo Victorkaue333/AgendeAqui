@@ -1,46 +1,504 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Salas e Laboratórios - AgendeAqui{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Salas e Laboratórios</h2>
-        <a href="{% url 'salas:create' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Nova Sala
+<style>
+    .salas-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .search-filter {
+        display: flex;
+        gap: 1rem;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-filter input,
+    .search-filter select {
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .search-filter input:focus,
+    .search-filter select:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .sala-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        margin-bottom: 1.5rem;
+    }
+
+    .sala-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .sala-header {
+        background: linear-gradient(135deg, #6366f1 0%, #3b4cca 100%);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .sala-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .sala-bloco {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9rem;
+    }
+
+    .sala-body {
+        padding: 1.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .recursos-list {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .recurso-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 0.4rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .sala-footer {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .sala-footer button {
+        flex: 1;
+    }
+
+    .sala-footer .btn {
+        width: 100%;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state-text {
+        color: #64748b;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* --- MODAL STYLES --- */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #6366f1 0%, #3b4cca 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .modal-header .modal-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .modal-footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .salas-container {
+            padding: 1rem;
+        }
+
+        .header-section {
+            flex-direction: column;
+        }
+
+        .search-filter {
+            flex-direction: column;
+            max-width: 100%;
+        }
+
+        .sala-header {
+            flex-direction: column;
+        }
+
+        .sala-footer {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="salas-container">
+    <!-- Header -->
+    <div class="header-section">
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                <i class="fas fa-door-open me-2" style="color: #6366f1;"></i>Salas e Laboratórios
+            </h1>
+            <p class="text-muted mb-0 small">Gerencie todos os espaços disponíveis da instituição</p>
+        </div>
+        <a href="{% url 'salas:create' %}" class="btn btn-primary" style="background: #6366f1; border: none;">
+            <i class="fas fa-plus me-2"></i>Nova Sala
         </a>
     </div>
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nome</th>
-                        <th>Capacidade</th>
-                        <th>Bloco</th>
-                        <th>Recursos</th>
-                        <th class="text-end">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sala in object_list %}
-                    <tr>
-                        <td>{{ sala.nome }}</td>
-                        <td>{{ sala.capacidade }}</td>
-                        <td>{{ sala.bloco }}</td>
-                        <td>{{ sala.recursos }}</td>
-                        <td class="text-end">
-                            <a href="{% url 'salas:edit' sala.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
-                            <a href="{% url 'salas:delete' sala.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">Nenhuma sala cadastrada.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+    <!-- Filtros de Busca -->
+    <div class="search-filter mb-4">
+        <input type="text" class="form-control" id="busca" placeholder="Buscar por nome...">
+        <select class="form-select" id="filtroBloco">
+            <option value="">Todos os Blocos</option>
+            <option value="A">Bloco A</option>
+            <option value="B">Bloco B</option>
+            <option value="C">Bloco C</option>
+        </select>
+    </div>
+
+    <!-- Lista de Salas -->
+    {% if object_list %}
+        {% for sala in object_list %}
+        <div class="sala-card">
+            <div class="sala-header">
+                <div>
+                    <div class="sala-title">
+                        <i class="fas fa-door-open me-2"></i>{{ sala.nome }}
+                    </div>
+                    <div class="sala-bloco">
+                        <i class="fas fa-building me-1"></i>{{ sala.bloco.nome|default:"Sem Bloco" }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-users me-1"></i>{{ sala.capacidade }} pessoas
+                    </span>
+                </div>
+            </div>
+
+            <div class="sala-body">
+                <div class="info-row">
+                    <span class="info-label">Capacidade:</span>
+                    <span class="info-value">{{ sala.capacidade }} pessoas</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Número:</span>
+                    <span class="info-value">{{ sala.numero|default:"N/A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Recursos:</span>
+                    <div>
+                        {% if sala.recursos.all %}
+                            <div class="recursos-list">
+                                {% for recurso in sala.recursos.all %}
+                                <span class="recurso-badge">
+                                    <i class="fas fa-check-circle me-1"></i>{{ recurso.nome }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="text-muted">Nenhum recurso</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="sala-footer">
+                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                            data-bs-toggle="modal" data-bs-target="#modalEditar" 
+                            onclick="abrirModalEdicao({{ sala.id }}, '{{ sala.nome }}', {{ sala.capacidade }}, '{{ sala.numero|default:'' }}')">
+                        <i class="fas fa-edit me-1"></i>Editar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                            data-bs-toggle="modal" data-bs-target="#modalExcluir"
+                            onclick="abrirModalExclusao({{ sala.id }}, '{{ sala.nome }}')">
+                        <i class="fas fa-trash me-1"></i>Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <p class="empty-state-text">Nenhuma sala cadastrada</p>
+            <a href="{% url 'salas:create' %}" class="btn btn-primary" style="background: #6366f1; border: none;">
+                <i class="fas fa-plus me-2"></i>Cadastrar Primeira Sala
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- MODAL EDITAR SALA -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarLabel">
+                    <i class="fas fa-edit me-2"></i>Editar Sala
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="post" id="formEditar">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Nome da Sala *</label>
+                        <input type="text" class="form-control" id="editNome" name="nome" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editCapacidade" class="form-label">Capacidade *</label>
+                            <input type="number" class="form-control" id="editCapacidade" name="capacidade" min="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editNumero" class="form-label">Número</label>
+                            <input type="text" class="form-control" id="editNumero" name="numero">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editBloco" class="form-label">Bloco</label>
+                        <select class="form-select" id="editBloco" name="bloco">
+                            <option value="">Selecionar Bloco</option>
+                            <option value="Principal">Bloco Principal</option>
+                            <option value="A">Bloco A</option>
+                            <option value="B">Bloco B</option>
+                            <option value="C">Bloco C</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editRecursos" class="form-label">Recursos Disponíveis</label>
+                        <div id="editRecursos" class="form-check-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rec1" value="Projetor" name="recursos">
+                                <label class="form-check-label" for="rec1">Projetor</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rec2" value="Ar Condicionado" name="recursos">
+                                <label class="form-check-label" for="rec2">Ar Condicionado</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rec3" value="Lousa Inteligente" name="recursos">
+                                <label class="form-check-label" for="rec3">Lousa Inteligente</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rec4" value="Computadores" name="recursos">
+                                <label class="form-check-label" for="rec4">Computadores</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="background: #6366f1; border: none;">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+                <input type="hidden" id="salaIdEditar" name="sala_id">
+            </form>
         </div>
     </div>
 </div>
+
+<!-- MODAL EXCLUIR SALA -->
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #ef4444; color: white; border: none;">
+                <h5 class="modal-title" id="modalExcluirLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="font-size: 2rem; color: #ef4444;">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0" style="color: #0f172a; font-weight: 700;">Tem certeza que deseja excluir?</h6>
+                        <p class="mb-0 text-muted small" id="salaNomeExcluir"></p>
+                    </div>
+                </div>
+                <p class="text-muted" style="border-left: 3px solid #fca5a5; padding-left: 1rem;">
+                    <i class="fas fa-info-circle me-2"></i>Esta ação é irreversível. Todos os agendamentos associados a esta sala serão afetados.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarExclusao()" style="background: #ef4444; border: none;">
+                    <i class="fas fa-trash me-2"></i>Excluir Permanentemente
+                </button>
+            </div>
+            <input type="hidden" id="salaIdExcluir">
+        </div>
+    </div>
+</div>
+
+<script>
+    // Filtro de busca
+    document.getElementById('busca').addEventListener('keyup', function() {
+        const termo = this.value.toLowerCase();
+        document.querySelectorAll('.sala-card').forEach(card => {
+            const titulo = card.querySelector('.sala-title').textContent.toLowerCase();
+            card.style.display = titulo.includes(termo) ? '' : 'none';
+        });
+    });
+
+    // Abrir Modal de Edição
+    function abrirModalEdicao(id, nome, capacidade, numero) {
+        document.getElementById('salaIdEditar').value = id;
+        document.getElementById('editNome').value = nome;
+        document.getElementById('editCapacidade').value = capacidade;
+        document.getElementById('editNumero').value = numero;
+        
+        // Atualizar a ação do formulário
+        document.getElementById('formEditar').action = `/salas/${id}/editar/`;
+    }
+
+    // Abrir Modal de Exclusão
+    function abrirModalExclusao(id, nome) {
+        document.getElementById('salaIdExcluir').value = id;
+        document.getElementById('salaNomeExcluir').textContent = `${nome}`;
+    }
+
+    // Confirmar Exclusão
+    function confirmarExclusao() {
+        const salaId = document.getElementById('salaIdExcluir').value;
+        window.location.href = `/salas/${salaId}/excluir/`;
+    }
+
+    // Submeter formulário de edição via AJAX
+    document.getElementById('formEditar').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const salaId = document.getElementById('salaIdEditar').value;
+        const formData = new FormData(this);
+        
+        fetch(`/salas/${salaId}/editar/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Fechar modal e recarregar página
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditar'));
+                modal.hide();
+                location.reload();
+            } else {
+                alert('Erro ao atualizar sala: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao atualizar sala');
+        });
+    });
+</script>
+
 {% endblock %}

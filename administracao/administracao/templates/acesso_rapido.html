@@ -1,113 +1,223 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Acesso Rápido {% endblock %}
-
-{% block extra_css %}
-<style>
-  .dashboard-center {
-    min-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 2.5rem;
-  }
-  .dashboard-title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #232946;
-    margin-bottom: 0.2rem;
-    text-align: center;
-  }
-  .dashboard-subtitle {
-    color: #7b809a;
-    font-size: 1.05rem;
-    margin-bottom: 2.2rem;
-    text-align: center;
-  }
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 32px;
-    max-width: 700px;
-    width: 100%;
-    margin: 0 auto;
-  }
-  .dashboard-card {
-    background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px rgba(44,54,80,0.10);
-    padding: 32px 18px 22px 18px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: box-shadow 0.15s, transform 0.13s;
-    border: 2px solid transparent;
-    text-align: center;
-    min-height: 170px;
-    text-decoration: none;
-  }
-  .dashboard-card:hover, .dashboard-card:focus {
-    box-shadow: 0 8px 32px rgba(44,54,80,0.18);
-    border-color: #6366f1;
-    transform: translateY(-3px) scale(1.03);
-    text-decoration: none;
-  }
-  .dashboard-card .icon {
-    font-size: 2.3rem;
-    margin-bottom: 16px;
-    border-radius: 12px;
-    padding: 12px;
-    display: inline-block;
-    color: #fff;
-  }
-  .icon-green { background: #22c55e; }
-  .icon-blue { background: #3b82f6; }
-  .icon-orange { background: #f97316; }
-  .icon-purple { background: #a21caf; }
-  .icon-cyan { background: #06b6d4; }
-  .icon-red { background: #ef4444; }
-  .dashboard-card-title {
-    font-size: 1.08rem;
-    font-weight: 700;
-    color: #232946;
-    margin-bottom: 0.2rem;
-  }
-  .dashboard-card-desc {
-    font-size: 0.97rem;
-    color: #7b809a;
-    margin-bottom: 0;
-  }
-  @media (max-width: 700px) {
-    .dashboard-grid { grid-template-columns: 1fr; gap: 18px; }
-    .dashboard-center { margin-top: 1.2rem; }
-  }
-</style>
-{% endblock %}
+{% block title %}Acesso Rápido - AgendeAqui{% endblock %}
 
 {% block content %}
-<div class="dashboard-center">
-  <div class="dashboard-title">Olá, {{ request.user.first_name|default:request.user.username }}!</div>
-  <div class="dashboard-subtitle">Selecione uma opção para começar</div>
-  <div class="dashboard-grid">
-    <a href="{% url 'agendamentos:agendamentos' %}" class="dashboard-card" tabindex="0">
-      <span class="icon icon-green"><i class="fas fa-calendar-check"></i></span>
-      <span class="dashboard-card-title">Agendamentos</span>
-      <span class="dashboard-card-desc">Visualizar e gerenciar reservas ativas.</span>
-    </a>
-    <a href="{% url 'salas:list' %}" class="dashboard-card" tabindex="0">
-      <span class="icon icon-blue"><i class="fas fa-door-open"></i></span>
-      <span class="dashboard-card-title">Salas e Labs</span>
-      <span class="dashboard-card-desc">Gerencie salas, laboratórios e recursos.</span>
-    </a>
-    <a href="{% url 'relatorios:index' %}" class="dashboard-card" tabindex="0">
-      <span class="icon icon-orange"><i class="fas fa-chart-pie"></i></span>
-      <span class="dashboard-card-title">Relatórios</span>
-      <span class="dashboard-card-desc">Acesse relatórios de uso e estatísticas.</span>
-    </a>
-    
-  </div>
+<style>
+    .acesso-rapido-container {
+        padding: 3rem 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .acesso-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .acesso-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+
+    .acesso-header p {
+        font-size: 1rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .acesso-rapido-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .acesso-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .acesso-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        border-color: #cbd5e1;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    /* Cores dos ícones por tipo */
+    .acesso-card:nth-child(1) .card-icon {
+        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    }
+
+    .acesso-card:nth-child(2) .card-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    }
+
+    .acesso-card:nth-child(3) .card-icon {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+
+    .acesso-card:nth-child(4) .card-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    }
+
+    .acesso-card:nth-child(5) .card-icon {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .acesso-card:nth-child(6) .card-icon {
+        background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+    }
+
+    .acesso-card:hover .card-icon {
+        transform: scale(1.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .acesso-rapido-container {
+            padding: 2rem 1rem;
+        }
+
+        .acesso-rapido-grid {
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .acesso-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .acesso-card {
+            padding: 2rem 1.5rem;
+            gap: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .card-description {
+            font-size: 0.8rem;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="acesso-rapido-container">
+    <!-- Header -->
+    <div class="acesso-header">
+        <h1>Olá, {{ user_display_name }}!</h1>
+        <p>Selecione uma opção para começar</p>
+    </div>
+
+    <!-- Grid de Cards -->
+    <div class="acesso-rapido-grid">
+        <!-- Dashboard -->
+        <a href="{% url 'dashboard:home' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="card-title">Dashboard</h3>
+            <p class="card-description">Resumo Operacional</p>
+        </a>
+
+        <!-- Agendamentos -->
+        <a href="{% url 'agendamentos:agendamentos' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3 class="card-title">Agendamentos</h3>
+            <p class="card-description">Dashboard Financeiro</p>
+        </a>
+
+        <!-- Salas -->
+        <a href="{% url 'salas:list' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <h3 class="card-title">Salas</h3>
+            <p class="card-description">Gestão de Produtos</p>
+        </a>
+
+        <!-- Relatórios -->
+        <a href="{% url 'relatorios:index' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3 class="card-title">Relatórios</h3>
+            <p class="card-description">Contas a Receber</p>
+        </a>
+
+        <!-- Perfil -->
+        <a href="{% url 'usuarios:perfil' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h3 class="card-title">Perfil</h3>
+            <p class="card-description">Gestão de Vendas</p>
+        </a>
+
+        <!-- Sair -->
+        <a href="{% url 'logout' %}" class="acesso-card">
+            <div class="card-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h3 class="card-title">Sair</h3>
+            <p class="card-description">Relatórios</p>
+        </a>
+    </div>
 </div>
+
 {% endblock %}

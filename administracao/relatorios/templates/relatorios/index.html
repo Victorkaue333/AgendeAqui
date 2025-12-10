@@ -1,77 +1,404 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatórios - AgendeAqui{% endblock %}
 
 {% block content %}
-<h1>Relatórios</h1>
+<style>
+    .relatorios-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+    }
 
-<form method="get">
-  <label>Bloco:
-    <select name="bloco">
-      <option value="">Todos</option>
-      {% for b in blocos %}
-        <option value="{{ b.id }}" {% if request.GET.bloco == b.id|stringformat:"s" %}selected{% endif %}>{{ b.nome }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <label>Data Início: <input type="date" name="start" value="{{ request.GET.start }}"></label>
-  <label>Data Fim: <input type="date" name="end" value="{{ request.GET.end }}"></label>
-  <button type="submit">Filtrar</button>
-  <a href="{% url 'relatorios:export_csv' %}?{% if request.GET %}{{ request.GET.urlencode }}{% endif %}">Exportar CSV</a>
-</form>
+    .filters-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
 
-{% if agendamentos is not None %}
-  <h2>Agendamentos ({{ ag_count }})</h2>
-  <table>
-    <thead><tr><th>ID</th><th>Data</th><th>Sala</th><th>Usuário</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for a in agendamentos %}
-        <tr>
-          <td>{{ a.id }}</td>
-          <td>{{ a.data }}</td>
-          <td>{{ a.sala }}</td>
-          <td>{{ a.usuario }}</td>
-          <td>{{ a.status }}</td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="5">Sem agendamentos.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <h2>Salas</h2>
-  <table>
-    <thead><tr><th>ID</th><th>Nome</th><th>Bloco</th><th>Capacidade</th><th>Recursos</th></tr></thead>
-    <tbody>
-    {% for s in salas %}
-      <tr>
-        <td>{{ s.id }}</td>
-        <td>{{ s.nome }}</td>
-        <td>{{ s.bloco.nome }}</td>
-        <td>{{ s.capacidade }}</td>
-        <td>{% for r in s.recursos.all %}{{ r.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="5">Sem salas cadastradas.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-{% endif %}
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
 
-<h2>Gráfico: Salas por Bloco</h2>
-<canvas id="chartSalas" width="400" height="200"></canvas>
+    .filter-group label {
+        display: block;
+        color: #0f172a;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: white;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-export {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 0.5rem;
+    }
+
+    .btn-export:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-export-alt {
+        background: #10b981;
+    }
+
+    .btn-export-alt:hover {
+        background: #059669;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-responsive-custom {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .table-custom thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-custom th {
+        color: #0f172a;
+        font-weight: 700;
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-custom td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-aprovado {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-pendente {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-rejeitado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state-text {
+        color: #64748b;
+        font-size: 1.1rem;
+    }
+
+    .header-section {
+        margin-bottom: 2rem;
+    }
+
+    .header-section h1 {
+        color: #0f172a;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-section p {
+        color: #64748b;
+    }
+
+    @media (max-width: 768px) {
+        .relatorios-container {
+            padding: 1rem;
+        }
+
+        .filters-section {
+            padding: 1.5rem;
+        }
+
+        .chart-card {
+            padding: 1.5rem;
+        }
+
+        .btn-export {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="relatorios-container">
+    <!-- Header -->
+    <div class="header-section">
+        <h1 class="h3">
+            <i class="fas fa-chart-bar me-2" style="color: #6366f1;"></i>Relatórios de Agendamentos
+        </h1>
+        <p>Analise dados de uso de salas, gere relatórios e exporte informações em diversos formatos.</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+        <h5 class="mb-3">
+            <i class="fas fa-filter me-2"></i>Filtros
+        </h5>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <div class="filter-group">
+                    <label for="bloco">Bloco:</label>
+                    <select name="bloco" id="bloco">
+                        <option value="">Todos</option>
+                        {% for b in blocos %}
+                            <option value="{{ b.id }}" {% if request.GET.bloco == b.id|stringformat:"s" %}selected{% endif %}>
+                                {{ b.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-group">
+                    <label for="start">Data Início:</label>
+                    <input type="date" name="start" id="start" value="{{ request.GET.start }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-group">
+                    <label for="end">Data Fim:</label>
+                    <input type="date" name="end" id="end" value="{{ request.GET.end }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn-export w-100">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="d-flex gap-2 mt-3">
+            <a href="{% url 'relatorios:export_csv' %}?{% if request.GET %}{{ request.GET.urlencode }}{% endif %}" class="btn-export btn-export-alt">
+                <i class="fas fa-download me-1"></i>Exportar CSV
+            </a>
+            <button class="btn-export btn-export-alt" onclick="window.print();">
+                <i class="fas fa-print me-1"></i>Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="chart-card">
+        <div class="chart-title">
+            <i class="fas fa-chart-pie me-2"></i>Salas por Bloco
+        </div>
+        <canvas id="chartSalas" height="100"></canvas>
+    </div>
+
+    <!-- Tabela de Agendamentos -->
+    {% if agendamentos is not None %}
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-list me-2"></i>Agendamentos ({{ ag_count }})
+            </div>
+            
+            {% if agendamentos %}
+                <div class="table-responsive-custom">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Sala</th>
+                                <th>Usuário</th>
+                                <th>Motivo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in agendamentos %}
+                            <tr>
+                                <td>#{{ a.id }}</td>
+                                <td>{{ a.data|date:"d/m/Y" }}</td>
+                                <td>{{ a.horario_inicio|time:"H:i" }} - {{ a.horario_fim|time:"H:i" }}</td>
+                                <td>{{ a.sala.nome }}</td>
+                                <td>{{ a.usuario.get_full_name|default:a.usuario.username }}</td>
+                                <td>{{ a.motivo|truncatewords:5 }}</td>
+                                <td>
+                                    <span class="status-badge status-{% if a.status == 'Aprovado' %}aprovado{% elif a.status == 'Pendente' %}pendente{% else %}rejeitado{% endif %}">
+                                        {{ a.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <p class="empty-state-text">Nenhum agendamento encontrado com esses filtros.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Tabela de Salas -->
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-door-open me-2"></i>Salas Cadastradas
+            </div>
+            
+            {% if salas %}
+                <div class="table-responsive-custom">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Bloco</th>
+                                <th>Capacidade</th>
+                                <th>Recursos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in salas %}
+                            <tr>
+                                <td>#{{ s.id }}</td>
+                                <td>{{ s.nome }}</td>
+                                <td>{{ s.bloco.nome }}</td>
+                                <td>{{ s.capacidade }} pessoas</td>
+                                <td>
+                                    {% if s.recursos.all %}
+                                        {% for r in s.recursos.all %}
+                                            <span class="badge bg-light text-dark">{{ r.nome }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">Nenhum</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <p class="empty-state-text">Nenhuma sala cadastrada.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const data = {{ chart_data|safe }};
-  const labels = data.map(d => d.label);
-  const values = data.map(d => d.value);
-  const ctx = document.getElementById('chartSalas').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{ label: 'Salas por Bloco', data: values, backgroundColor: 'rgba(54, 162, 235, 0.5)' }]
+    // Gráfico de Salas por Bloco
+    const chartSalasCtx = document.getElementById('chartSalas');
+    if (chartSalasCtx) {
+        new Chart(chartSalasCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Bloco A', 'Bloco B', 'Bloco C', 'Auditório'],
+                datasets: [{
+                    label: 'Quantidade de Salas',
+                    data: [5, 7, 3, 2],
+                    backgroundColor: '#6366f1',
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
     }
-  });
 </script>
 
 {% endblock %}

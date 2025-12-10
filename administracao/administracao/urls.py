@@ -10,10 +10,10 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html', authentication_form=CustomAuthenticationForm, next_page='acesso_rapido'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('acesso_rapido/', acesso_rapido, name='acesso_rapido'),
-    path('login/', login_view, name='login_page'),
-    path('cadastro/', cadastro, name='cadastro_page'),
+    path('cadastro/', cadastro, name='cadastro'),
     path('salas/', include('salas.urls')),
     path('relatorios/', include('relatorios.urls')),
     path('agendamentos/', include('agendamentos.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('', include('usuarios.urls')),
 ]

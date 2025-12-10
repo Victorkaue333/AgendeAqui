@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Cadastro de Sala - AgendeAqui{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4 d-flex align-items-center gap-2">
+                    <i class="fas fa-door-open fa-lg"></i>
+                    <h4 class="mb-0">Cadastrar Nova Sala</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" autocomplete="off">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_nome" class="form-label">Nome da Sala</label>
+                            <input type="text" name="nome" class="form-control" id="id_nome" placeholder="Ex: Lab 101" value="{{ form.nome.value|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_capacidade" class="form-label">Capacidade</label>
+                            <input type="number" name="capacidade" class="form-control" id="id_capacidade" min="1" placeholder="Ex: 40" value="{{ form.capacidade.value|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_bloco" class="form-label">Bloco</label>
+                            <select name="bloco" class="form-select" id="id_bloco" required>
+                                <option value="" disabled {% if not form.bloco.value %}selected{% endif %}>Selecione o bloco</option>
+                                <option value="A" {% if form.bloco.value == 'A' %}selected{% endif %}>Bloco A</option>
+                                <option value="B" {% if form.bloco.value == 'B' %}selected{% endif %}>Bloco B</option>
+                                <option value="C" {% if form.bloco.value == 'C' %}selected{% endif %}>Bloco C</option>
+                                <option value="D" {% if form.bloco.value == 'D' %}selected{% endif %}>Bloco D</option>
+                                <option value="E" {% if form.bloco.value == 'E' %}selected{% endif %}>Bloco E</option>
+                                <option value="F" {% if form.bloco.value == 'F' %}selected{% endif %}>Bloco F</option>
+                                <option value="G" {% if form.bloco.value == 'G' %}selected{% endif %}>Bloco G</option>
+                                <option value="H" {% if form.bloco.value == 'H' %}selected{% endif %}>Bloco H</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_recursos" class="form-label">Recursos</label>
+                            <textarea name="recursos" class="form-control" id="id_recursos" rows="2" placeholder="Ex: Projetor, Ar-condicionado, Computadores">{{ form.recursos.value|default:'' }}</textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'salas:list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .card-header.bg-primary {
+        background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%) !important;
+    }
+    .form-label { font-weight: 500; }
+    .form-control, .form-select, textarea {
+        border-radius: 0.5rem;
+        font-size: 1rem;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%);
+        border: none;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #1d4ed8 60%, #4f46e5 100%);
+    }
+</style>
+{% endblock %}

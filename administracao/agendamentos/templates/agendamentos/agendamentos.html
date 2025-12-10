@@ -4,445 +4,431 @@
 {% block title %}Agendamento de Salas - AgendeAqui{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     :root {
-        /* Palette Institucional Moderna */
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --bg-body: #f3f4f6;
-        --bg-surface: #ffffff;
-        --border-color: #e5e7eb;
-        --text-main: #111827;
-        --text-muted: #6b7280;
-
-        /* Status Colors */
-        --status-approved-bg: #dcfce7;
-        --status-approved-text: #166534;
-        --status-approved-border: #22c55e;
-
-        --status-pending-bg: #fef9c3;
-        --status-pending-text: #854d0e;
-        --status-pending-border: #eab308;
-
-        --status-rejected-bg: #fee2e2;
-        --status-rejected-text: #991b1b;
-        --status-rejected-border: #ef4444;
-
-        /* Grid Dimensions */
-        --time-col-width: 80px;
-        --slot-height: 70px; /* Altura confortável para conteúdo */
+        --time-col-width: 70px;
+        --slot-height: 100px;
     }
 
-    body {
-        background-color: var(--bg-body);
+    .agendamentos-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
     }
 
-    .app-container {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 64px); /* Ajuste conforme navbar */
-        max-width: 1600px;
-        margin: 0 auto;
-        padding: 1.5rem;
-        gap: 1.5rem;
-    }
-
-    /* --- 1. Header da Página --- */
-    .page-header {
+    .header-section {
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
-    .page-title h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-main);
-        margin: 0;
-    }
-    .page-title p {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-    }
-
-    /* --- 2. Barra de Filtros (Card) --- */
-    .filters-bar {
-        background: var(--bg-surface);
-        padding: 1rem;
-        border-radius: 0.75rem;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
+        margin-bottom: 2rem;
         gap: 1rem;
         flex-wrap: wrap;
     }
 
-    .filter-group {
+    .calendar-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .calendar-header {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .calendar-controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .control-group {
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
-    
-    .filter-label {
-        font-size: 0.75rem;
+
+    .control-group label {
         font-weight: 600;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        letter-spacing: 0.05em;
+        color: #0f172a;
+        font-size: 0.9rem;
     }
 
-    .form-select-custom, .form-input-custom {
-        border: 1px solid var(--border-color);
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        color: var(--text-main);
-        background-color: #fff;
-        transition: border-color 0.15s ease-in-out;
-    }
-    .form-select-custom:focus, .form-input-custom:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    .control-group select,
+    .control-group input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.9rem;
     }
 
-    .view-switcher .btn {
-        font-size: 0.875rem;
-        padding: 0.4rem 0.8rem;
+    .btn-novo {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-    
-    /* --- 3. Calendário Grid --- */
-    .calendar-container {
-        flex: 1;
-        background: var(--bg-surface);
-        border-radius: 0.75rem;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    .btn-novo:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    .view-toggle {
         display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        gap: 0.5rem;
+        background: #e2e8f0;
+        padding: 0.25rem;
+        border-radius: 6px;
     }
 
-    .calendar-scroll-area {
-        overflow: auto;
-        position: relative;
-        flex: 1;
+    .view-toggle button {
+        background: transparent;
+        border: none;
+        padding: 0.5rem 1rem;
+        color: #64748b;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .view-toggle button.active {
+        background: white;
+        color: #6366f1;
     }
 
     .calendar-grid {
         display: grid;
-        grid-template-columns: var(--time-col-width) repeat(5, 1fr); /* 5 dias úteis */
-        grid-template-rows: 50px repeat(16, var(--slot-height)); /* Header + 16 horas (07h-22h) */
+        grid-template-columns: var(--time-col-width) repeat(5, 1fr);
+        grid-auto-rows: var(--slot-height);
+        overflow-x: auto;
         min-width: 1000px;
     }
 
-    /* Headers (Dias) */
-    .col-header {
-        position: sticky;
-        top: 0;
+    .grid-header-time {
         background: #f8fafc;
-        border-bottom: 1px solid var(--border-color);
-        border-right: 1px solid var(--border-color);
-        z-index: 10;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.5rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grid-header-day {
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 2px solid #6366f1;
+        padding: 1rem;
+        font-weight: 700;
+        color: #6366f1;
+        text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-weight: 600;
-        color: var(--text-muted);
-        font-size: 0.85rem;
-    }
-    .col-header.today {
-        background: #eff6ff;
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--primary-color);
+        gap: 0.25rem;
     }
 
-    /* Coluna de Tempo */
-    .row-time {
-        position: sticky;
-        left: 0;
-        background: #fff;
-        border-right: 1px solid var(--border-color);
-        border-bottom: 1px solid #f3f4f6;
-        color: var(--text-muted);
+    .grid-header-day.other-day {
+        border-bottom: 1px solid #e2e8f0;
+        color: #64748b;
+    }
+
+    .day-name {
         font-size: 0.75rem;
-        display: flex;
-        justify-content: center;
-        padding-top: 0.5rem;
-        z-index: 20;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    /* Células */
+    .day-date {
+        font-size: 1.1rem;
+    }
+
+    .grid-time-label {
+        background: white;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+        color: #64748b;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .grid-cell {
-        border-right: 1px solid #f3f4f6;
-        border-bottom: 1px solid #f3f4f6;
+        background: white;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
         position: relative;
+        cursor: pointer;
         transition: background-color 0.2s;
     }
+
     .grid-cell:hover {
-        background-color: #f9fafb;
-        cursor: pointer;
-    }
-    .grid-cell:hover::after {
-        content: "+";
-        position: absolute;
-        top: 50%; left: 50%; transform: translate(-50%, -50%);
-        color: var(--primary-color);
-        font-size: 1.5rem;
-        opacity: 0.5;
+        background-color: #f0f4ff;
     }
 
-    /* Eventos */
+    .grid-cell:last-child {
+        border-right: none;
+    }
+
     .event-card {
-        margin: 2px 4px;
-        padding: 6px 8px;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        border-left: 3px solid;
-        cursor: pointer;
-        position: relative;
-        z-index: 5;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .event-card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        z-index: 10;
-    }
-
-    /* Status Styles */
-    .status-aprovado {
-        background-color: var(--status-approved-bg);
-        color: var(--status-approved-text);
-        border-left-color: var(--status-approved-border);
-    }
-    .status-pendente {
-        background-color: var(--status-pending-bg);
-        color: var(--status-pending-text);
-        border-left-color: var(--status-pending-border);
-    }
-    .status-rejeitado {
-        background-color: var(--status-rejected-bg);
-        color: var(--status-rejected-text);
-        border-left-color: var(--status-rejected-border);
-        opacity: 0.8;
-    }
-
-    .event-time { font-weight: 700; margin-bottom: 2px; }
-    .event-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .event-user { font-size: 0.7rem; opacity: 0.9; }
-
-    /* Botão Cancelar (RF11) */
-    .btn-cancel-event {
         position: absolute;
-        top: 4px;
-        right: 4px;
-        color: inherit;
-        opacity: 0.6;
-        padding: 2px;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        margin: 0;
+        padding: 0.5rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        border-left: 4px solid;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-    .btn-cancel-event:hover { opacity: 1; }
 
+    .event-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .event-aprovado {
+        background: #dcfce7;
+        color: #166534;
+        border-left-color: #10b981;
+    }
+
+    .event-pendente {
+        background: #fef3c7;
+        color: #92400e;
+        border-left-color: #f59e0b;
+    }
+
+    .event-rejeitado {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left-color: #ef4444;
+        opacity: 0.7;
+    }
+
+    .alert-custom {
+        background: white;
+        border-left: 4px solid #6366f1;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .pending-badge {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .agendamentos-container {
+            padding: 1rem;
+        }
+
+        .header-section {
+            flex-direction: column;
+        }
+
+        .calendar-controls {
+            flex-direction: column;
+        }
+
+        .control-group {
+            width: 100%;
+        }
+
+        .control-group select,
+        .control-group input {
+            flex: 1;
+        }
+
+        .calendar-grid {
+            grid-template-columns: 50px repeat(3, 1fr);
+            --slot-height: 80px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="app-container">
-
-    <!-- 1. Header da Página -->
-    <header class="page-header">
-        <div class="page-title">
-            <h1>Agendamento de Salas</h1>
-            <p>Gerencie reservas e verifique disponibilidade em tempo real.</p>
-        </div>
+<div class="agendamentos-container">
+    <!-- Header -->
+    <div class="header-section">
         <div>
-            <!-- RF07: Botão Principal de Ação -->
-            <button class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSolicitacao">
-                <i class="fas fa-plus"></i>
-                Novo Agendamento
-            </button>
+            <h1 class="h3 fw-bold mb-1">
+                <i class="fas fa-calendar-alt me-2" style="color: #6366f1;"></i>Agendamento de Salas
+            </h1>
+            <p class="text-muted mb-0 small">Gerencie reservas e verifique disponibilidade em tempo real.</p>
         </div>
-    </header>
+        <button class="btn-novo" data-bs-toggle="modal" data-bs-target="#modalSolicitacao">
+            <i class="fas fa-plus me-2"></i>Novo Agendamento
+        </button>
+    </div>
 
-    <!-- 2. Barra de Filtros -->
-    <section class="filters-bar">
-        <form method="get" class="d-flex w-100 align-items-center gap-3 flex-wrap">
-            <!-- Filtro de Sala -->
-            <div class="filter-group">
-                <label class="filter-label">Sala:</label>
-                <select name="sala_filtro" class="form-select-custom" style="width: 200px;">
-                    <option value="">Todas as Salas</option>
-                    {% for sala in salas %}
-                    <option value="{{ sala.id }}" {% if request.GET.sala_filtro == sala.id|stringformat:"i" %}selected{% endif %}>
-                        {{ sala.nome }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <!-- Filtro de Data -->
-            <div class="filter-group">
-                <label class="filter-label">Semana de:</label>
-                <input type="week" name="semana" class="form-input-custom" value="{{ semana_atual }}">
-            </div>
-
-            <button type="submit" class="btn btn-outline-secondary btn-sm ms-2">
-                <i class="fas fa-filter me-1"></i> Filtrar
-            </button>
-
-            <!-- RF10: Switch de Visualização (Visual apenas neste demo, requer lógica JS/Backend para funcionar pleno) -->
-            <div class="view-switcher btn-group ms-auto shadow-sm" role="group">
-                <button type="button" class="btn btn-outline-secondary active">Semana</button>
-                <button type="button" class="btn btn-outline-secondary">Dia</button>
-                <button type="button" class="btn btn-outline-secondary">Mês</button>
-            </div>
-        </form>
-    </section>
-
-    <!-- RF08: Alerta de Conflito (Feedback Visual) -->
-    {% if messages %}
-    <div class="alert-area">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                {% if message.tags == 'error' or 'conflito' in message.tags %}<i class="fas fa-exclamation-triangle me-2"></i>{% endif %}
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
+    <!-- Alertas -->
+    {% if solicitacoes_pendentes %}
+    <div class="alert-custom">
+        <i class="fas fa-clock me-2" style="color: #f59e0b;"></i>
+        <strong>{{ solicitacoes_pendentes|length }} solicitações aguardando aprovação</strong>
+        <a href="#" class="ms-2" style="color: #6366f1; font-weight: 600;">Ver Detalhes →</a>
     </div>
     {% endif %}
 
-    <!-- 3. Calendário / Grade Semanal -->
-    <main class="calendar-container">
-        
-        <!-- Aprovação Rápida (RF09) - Só aparece para coordenadores -->
-        {% if user.is_coordinator and solicitacoes_pendentes %}
-        <div class="bg-warning bg-opacity-10 border-bottom border-warning p-2 d-flex justify-content-between align-items-center px-4">
-            <span class="text-warning-emphasis fw-bold fs-7">
-                <i class="fas fa-clock me-2"></i>Há {{ solicitacoes_pendentes|length }} agendamentos pendentes de aprovação.
-            </span>
-            <a href="#" class="btn btn-sm btn-warning text-dark fw-bold">Revisar Agora</a>
-        </div>
-        {% endif %}
-
-        <div class="calendar-scroll-area">
-            <div class="calendar-grid">
-                <!-- Canto Superior Vazio -->
-                <div class="col-header justify-content-center bg-white" style="z-index: 30;">
-                    <i class="fas fa-clock text-muted"></i>
+    <!-- Calendário -->
+    <div class="calendar-wrapper">
+        <!-- Controles -->
+        <div class="calendar-header">
+            <div class="calendar-controls">
+                <div class="control-group">
+                    <label for="sala_filter">Sala:</label>
+                    <select id="sala_filter">
+                        <option value="">Todas as salas</option>
+                        {% for sala in salas %}
+                        <option value="{{ sala.id }}">{{ sala.nome }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
-                <!-- Headers dos Dias -->
-                <div class="col-header">SEG <span class="fw-normal">26/06</span></div>
-                <div class="col-header today">TER <span class="fw-normal">27/06</span></div>
-                <div class="col-header">QUA <span class="fw-normal">28/06</span></div>
-                <div class="col-header">QUI <span class="fw-normal">29/06</span></div>
-                <div class="col-header">SEX <span class="fw-normal">30/06</span></div>
+                <div class="control-group ms-auto">
+                    <label for="semana_view">Semana:</label>
+                    <input type="week" id="semana_view" value="{{ semana_atual }}">
+                </div>
 
-                <!-- Loop de Horas (07:00 as 22:00) -->
-                {% for hora in horas_display %}
-                    <div class="row-time">{{ hora }}:00</div>
-                    
-                    <!-- Slots de Agendamento (Clicáveis para RF07) -->
-                    <div class="grid-cell" onclick="abrirModalSolicitacao('segunda', '{{ hora }}')" title="Agendar Segunda {{ hora }}h"></div>
-                    <div class="grid-cell" onclick="abrirModalSolicitacao('terca', '{{ hora }}')" title="Agendar Terça {{ hora }}h"></div>
-                    <div class="grid-cell" onclick="abrirModalSolicitacao('quarta', '{{ hora }}')" title="Agendar Quarta {{ hora }}h"></div>
-                    <div class="grid-cell" onclick="abrirModalSolicitacao('quinta', '{{ hora }}')" title="Agendar Quinta {{ hora }}h"></div>
-                    <div class="grid-cell" onclick="abrirModalSolicitacao('sexta', '{{ hora }}')" title="Agendar Sexta {{ hora }}h"></div>
+                <div class="view-toggle">
+                    <button class="active" onclick="changeView('semana')">Semana</button>
+                    <button onclick="changeView('mes')">Mês</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid do Calendário -->
+        <div style="overflow-x: auto; padding: 1rem;">
+            <div class="calendar-grid">
+                <!-- Header: Horários -->
+                <div class="grid-header-time"></div>
+                <div class="grid-header-day">
+                    <span class="day-name">Segunda</span>
+                    <span class="day-date">26</span>
+                </div>
+                <div class="grid-header-day">
+                    <span class="day-name">Terça</span>
+                    <span class="day-date">27</span>
+                </div>
+                <div class="grid-header-day">
+                    <span class="day-name">Quarta</span>
+                    <span class="day-date">28</span>
+                </div>
+                <div class="grid-header-day">
+                    <span class="day-name">Quinta</span>
+                    <span class="day-date">29</span>
+                </div>
+                <div class="grid-header-day grid-header-day.other-day">
+                    <span class="day-name">Sexta</span>
+                    <span class="day-date">30</span>
+                </div>
+
+                <!-- Grid Cells -->
+                {% for hora in horas %}
+                    <div class="grid-time-label">{{ hora }}h</div>
+                    <div class="grid-cell" onclick="openScheduleModal('segunda', '{{ hora }}')"></div>
+                    <div class="grid-cell" onclick="openScheduleModal('terca', '{{ hora }}')"></div>
+                    <div class="grid-cell" onclick="openScheduleModal('quarta', '{{ hora }}')"></div>
+                    <div class="grid-cell" onclick="openScheduleModal('quinta', '{{ hora }}')"></div>
+                    <div class="grid-cell" onclick="openScheduleModal('sexta', '{{ hora }}')"></div>
                 {% endfor %}
 
-                <!-- Agendamentos (Posicionamento Absoluto via Grid Area) -->
-                {% for agendamento in agendamentos_semana %}
-                <div class="event-card 
-                    {% if agendamento.status == 'aprovado' %}status-aprovado
-                    {% elif agendamento.status == 'rejeitado' %}status-rejeitado
-                    {% else %}status-pendente{% endif %}"
-                    style="grid-column: {{ agendamento.dia_index }}; grid-row: {{ agendamento.grid_row_start }} / span {{ agendamento.duracao_slots }};"
-                    title="{{ agendamento.motivo }}">
-
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="event-time">{{ agendamento.hora_inicio|time:"H:i" }}</span>
-                        <!-- RF11: Cancelar Agendamento -->
-                        {% if agendamento.usuario == request.user and not agendamento.passou_do_prazo %}
-                        <a href="{% url 'agendamentos:cancelar' agendamento.id %}" class="btn-cancel-event" onclick="return confirm('Tem certeza que deseja cancelar?')">
-                            <i class="fas fa-times"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="event-title">{{ agendamento.sala.nome }}</div>
-                    <div class="event-user">
-                        <i class="fas fa-user-circle me-1"></i>{{ agendamento.usuario.first_name }}
-                    </div>
-                    
-                    <!-- RF09: Indicador para Coordenador -->
-                    {% if user.is_coordinator and agendamento.status == 'pendente' %}
-                        <div class="mt-1 d-flex gap-1">
-                            <a href="{% url 'agendamentos:aprovar' agendamento.id %}" class="badge bg-success text-decoration-none px-1">✓</a>
-                            <a href="{% url 'agendamentos:reprovar' agendamento.id %}" class="badge bg-danger text-decoration-none px-1">✕</a>
-                        </div>
-                    {% endif %}
+                <!-- Agendamentos -->
+                {% for agendamento in agendamentos %}
+                <div class="event-card event-{{ agendamento.status|lower }}" 
+                     title="{{ agendamento.sala.nome }} - {{ agendamento.motivo }}"
+                     onclick="viewDetails('{{ agendamento.id }}')">
+                    <strong>{{ agendamento.horario_inicio|time:"H:i" }}</strong><br>
+                    {{ agendamento.sala.nome }}
                 </div>
                 {% endfor %}
             </div>
         </div>
-    </main>
+    </div>
 </div>
 
-<!-- 4. Modal de Solicitação Elegante (RF07) -->
-<div class="modal fade" id="modalSolicitacao" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-primary">Nova Solicitação</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Modal de Agendamento -->
+<div class="modal fade" id="modalSolicitacao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #6366f1; color: white; border: none;">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus me-2"></i>Novo Agendamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted small mb-4">Preencha os dados abaixo para reservar uma sala. Conflitos serão verificados automaticamente.</p>
-                
-                <form method="post" action="{% url 'agendamentos:agendamentos' %}">
+            <div class="modal-body" style="padding: 2rem;">
+                <form method="post" action="#">
                     {% csrf_token %}
-                    
                     <div class="mb-3">
-                        <label class="form-label fw-bold text-secondary small text-uppercase">Sala / Laboratório</label>
-                        <select id="sala" name="sala" class="form-select form-select-lg fs-6" required>
-                            <option value="" selected disabled>Selecione...</option>
+                        <label for="sala" class="form-label fw-600">Sala *</label>
+                        <select name="sala" id="sala" class="form-select" required>
+                            <option value="">Selecione uma sala</option>
                             {% for sala in salas %}
-                            <option value="{{ sala.id }}">{{ sala.nome }} ({{ sala.capacidade }} lug.)</option>
+                            <option value="{{ sala.id }}">{{ sala.nome }} ({{ sala.capacidade }} pessoas)</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold text-secondary small text-uppercase">Data</label>
-                            <input type="date" id="data" name="data" class="form-control" required>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="data" class="form-label fw-600">Data *</label>
+                            <input type="date" name="data" id="data" class="form-control" required>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-secondary small text-uppercase">Início</label>
-                            <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-secondary small text-uppercase">Fim</label>
-                            <input type="time" id="hora_fim" name="hora_fim" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label for="horario_inicio" class="form-label fw-600">Horário Início *</label>
+                            <input type="time" name="horario_inicio" id="horario_inicio" class="form-control" required>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-secondary small text-uppercase">Motivo da Reserva</label>
-                        <textarea class="form-control" id="motivo" name="motivo" rows="3" placeholder="Ex: Apresentação de TCC da turma X..." required></textarea>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="horario_fim" class="form-label fw-600">Horário Fim *</label>
+                            <input type="time" name="horario_fim" id="horario_fim" class="form-control" required>
+                        </div>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-3">Solicitar Agendamento</button>
-                        <button type="button" class="btn btn-light text-muted" data-bs-dismiss="modal">Cancelar</button>
+                    <div class="mb-3">
+                        <label for="motivo" class="form-label fw-600">Motivo da Reserva *</label>
+                        <textarea name="motivo" id="motivo" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" style="background: #6366f1; border: none;">
+                            <i class="fas fa-check me-2"></i>Solicitar Agendamento
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -454,23 +440,16 @@
 
 {% block extra_js %}
 <script>
-    // Script de interação com o Grid
-    function abrirModalSolicitacao(diaSemana, hora) {
-        const modal = new bootstrap.Modal(document.getElementById('modalSolicitacao'));
-        
-        // Define hora inicial
-        const inputInicio = document.getElementById('hora_inicio');
-        inputInicio.value = hora + ":00";
-        
-        // Define hora final (sugestão +1h)
-        const inputFim = document.getElementById('hora_fim');
-        let horaInt = parseInt(hora);
-        inputFim.value = (horaInt + 1).toString().padStart(2, '0') + ":00";
-        
-        // UX: Foca na seleção de sala
-        setTimeout(() => document.getElementById('sala').focus(), 500);
-        
-        modal.show();
+    function changeView(view) {
+        console.log('Visualização alterada para: ' + view);
+    }
+
+    function openScheduleModal(day, hour) {
+        document.getElementById('modalSolicitacao').style.display = 'block';
+    }
+
+    function viewDetails(agendamentoId) {
+        window.location.href = '/agendamentos/' + agendamentoId + '/';
     }
 </script>
 {% endblock %}

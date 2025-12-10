@@ -48,13 +48,13 @@
         border: 1px solid var(--border);
         backdrop-filter: blur(12px);
         border-radius: 16px;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .glass-card:hover {
         border-color: var(--border-hover);
         background: var(--surface-hover);
-        transform: translateY(-2px);
+        transform: translateY(-4px);
         box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
     }
 
@@ -115,9 +115,14 @@
         padding: 10px 24px;
         border-radius: 8px;
         text-decoration: none;
-        transition: transform 0.2s;
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(255,255,255,0.1);
     }
-    .nav-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,255,255,0.25); }
+    .nav-btn-primary:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255,255,255,0.25);
+        background: #f0f0f0;
+    }
 
     /* --- HERO SECTION --- */
     .hero-section {
@@ -142,7 +147,7 @@
     }
 
     .hero-title {
-        font-size: 4rem;
+        font-size: 3.5rem;
         font-weight: 800;
         letter-spacing: -0.03em;
         line-height: 1.1;
@@ -154,9 +159,10 @@
         font-size: 1.35rem; /* Aumentado */
         color: var(--text-body); /* Cor mais clara */
         font-weight: 400;
-        max-width: 650px;
+        max-width: 750px;
         margin: 0 auto 2.5rem auto;
-        line-height: 1.6;
+        line-height: 1.7;
+        letter-spacing: 0.3px;
     }
 
     .cta-group {
@@ -175,10 +181,32 @@
         font-size: 1.1rem;
         border: none;
         box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(99, 102, 241, 0.4);
-        transition: all 0.2s;
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         text-decoration: none;
+        position: relative;
+        overflow: hidden;
     }
-    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 8px 30px rgba(99, 102, 241, 0.6); color: white;}
+    
+    .btn-hero-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: left 0.3s ease;
+    }
+    
+    .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 8px 30px rgba(99, 102, 241, 0.6);
+        color: white;
+    }
+    
+    .btn-hero-primary:hover::before {
+        left: 100%;
+    }
 
     .btn-hero-secondary {
         background: rgba(255,255,255,0.1);
@@ -206,13 +234,16 @@
         border: 1px solid rgba(255,255,255,0.15);
         box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px -10px rgba(0,0,0,0.6);
         transform: rotateX(5deg) scale(0.95);
-        transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         overflow: hidden;
         max-width: 1000px;
         margin: 0 auto;
     }
 
-    .ui-mockup:hover { transform: rotateX(0deg) scale(1); }
+    .ui-mockup:hover { 
+        transform: rotateX(0deg) scale(1);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 50px 100px -20px rgba(0,0,0,0.8);
+    }
     
     .mockup-header {
         height: 40px;
@@ -268,9 +299,23 @@
     }
 
     /* --- COMO FUNCIONA --- */
-    .step-card { position: relative; padding-left: 25px; border-left: 2px solid var(--border); padding-bottom: 3rem; }
+    .step-card { 
+        position: relative; 
+        padding-left: 25px; 
+        border-left: 3px solid var(--border); 
+        padding-bottom: 3rem;
+        transition: all 0.3s ease;
+    }
     .step-card:last-child { padding-bottom: 0; }
-    .step-card.active { border-left-color: var(--primary); }
+    .step-card.active { 
+        border-left-color: var(--primary);
+        padding-left: 35px;
+    }
+    
+    .step-card:hover {
+        border-left-color: var(--primary);
+        transform: translateX(4px);
+    }
     
     .step-number { 
         color: #a5b4fc; 
@@ -278,13 +323,19 @@
         margin-bottom: 10px; 
         font-size: 0.95rem; 
         text-transform: uppercase; 
-        letter-spacing: 1.5px; 
+        letter-spacing: 1.5px;
+        display: inline-block;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(99, 102, 241, 0.3);
     }
     .step-card h5 {
         color: white;
         font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
     }
     .step-card p {
         color: var(--text-muted);
@@ -303,6 +354,13 @@
         margin-bottom: 24px;
         border: 1px solid rgba(99, 102, 241, 0.3);
         box-shadow: 0 4px 20px -5px rgba(99, 102, 241, 0.3);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .glass-card:hover .feature-icon-box {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px -5px rgba(99, 102, 241, 0.5);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
     }
 
     .glass-card h4 {
@@ -325,6 +383,14 @@
         border-radius: 16px;
         border: 1px solid var(--border);
         height: 100%;
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    .testimonial-card:hover {
+        border-color: var(--border-hover);
+        background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px -8px rgba(0,0,0,0.4);
     }
     
     .testimonial-card p {
@@ -378,20 +444,22 @@
         border-top: 1px solid var(--border);
         border-bottom: 1px solid var(--border);
     }
-    .final-cta h2 { color: white; font-size: 3.5rem; font-weight: 800; }
-    .final-cta p { color: var(--text-muted); font-size: 1.3rem; }
+    .final-cta h2 { color: white; font-size: 2.8rem; font-weight: 800; }
+    .final-cta p { color: var(--text-body); font-size: 1.3rem; }
 
     /* --- RESPONSIVIDADE --- */
     @media (max-width: 768px) {
-        .hero-title { font-size: 2.8rem; }
-        .hero-subtitle { font-size: 1.15rem; }
+        .hero-title { font-size: 2.2rem; }
+        .hero-subtitle { font-size: 1.1rem; }
         .cta-group { flex-direction: column; padding: 0 20px; }
         .btn-hero-primary, .btn-hero-secondary { width: 100%; }
         .nav-buttons { display: none; }
         .ui-mockup { transform: none; }
         .logos-grid { gap: 2rem; flex-direction: column; align-items: center; }
         .landing-navbar { padding: 15px 20px; }
-        .section-header h2 { font-size: 2.2rem; }
+        .section-header h2 { font-size: 2rem; }
+        .final-cta h2 { font-size: 2rem; }
+        .hero-section { padding-top: 120px; padding-bottom: 60px; }
     }
 
     /* Forçar textos "muted" para branco nesta landing page */
@@ -399,6 +467,83 @@
     .final-cta .text-muted { color: #ffffff !important; }
     /* Garantir que mockup header URL não apareça apagado */
     .ui-mockup .mockup-header div:last-child { color: #ffffff !important; }
+
+    /* --- ANIMAÇÕES DE ENTRADA --- */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInFromLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInFromRight {
+        from {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .hero-title {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .hero-subtitle {
+        animation: fadeInUp 0.8s ease-out 0.1s backwards;
+    }
+
+    .cta-group {
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .ui-showcase-container {
+        animation: fadeInUp 0.8s ease-out 0.3s backwards;
+    }
+
+    .glass-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .glass-card:nth-child(1) { animation-delay: 0.1s; }
+    .glass-card:nth-child(2) { animation-delay: 0.2s; }
+    .glass-card:nth-child(3) { animation-delay: 0.3s; }
+    .glass-card:nth-child(4) { animation-delay: 0.4s; }
+    .glass-card:nth-child(5) { animation-delay: 0.5s; }
+
+    .testimonial-card {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .testimonial-card:nth-child(1) { animation-delay: 0.1s; }
+    .testimonial-card:nth-child(2) { animation-delay: 0.2s; }
+    .testimonial-card:nth-child(3) { animation-delay: 0.3s; }
 </style>
 
 <!-- Navbar -->
@@ -412,11 +557,18 @@
         </a>
         
         <div class="nav-buttons d-none d-md-flex align-items-center">
-            <a href="#features" class="nav-btn-outline">Recursos</a>
-            <a href="#faq" class="nav-btn-outline">FAQ</a>
-            <div style="width:1px; height:24px; background:var(--border); margin:0 15px;"></div>
-            <a href="{% url 'login' %}" class="nav-btn-outline">Entrar</a>
-            <a href="{% url 'cadastro' %}" class="nav-btn-primary">Começar</a>
+            {% if is_authenticated %}
+                <span class="nav-btn-outline" style="cursor: default;">Olá, {{ user_display_name }}!</span>
+                <div style="width:1px; height:24px; background:var(--border); margin:0 15px;"></div>
+                <a href="{% url 'acesso_rapido' %}" class="nav-btn-outline">Dashboard</a>
+                <a href="{% url 'logout' %}" class="nav-btn-primary">Sair</a>
+            {% else %}
+                <a href="#features" class="nav-btn-outline">Recursos</a>
+                <a href="#faq" class="nav-btn-outline">FAQ</a>
+                <div style="width:1px; height:24px; background:var(--border); margin:0 15px;"></div>
+                <a href="{% url 'login' %}" class="nav-btn-outline">Entrar</a>
+                <a href="{% url 'cadastro' %}" class="nav-btn-primary">Começar</a>
+            {% endif %}
         </div>
     </div>
 </nav>
@@ -502,16 +654,16 @@
         
         <div class="row mt-5 text-center">
             <div class="col-4">
-                <h3 class="fw-bold text-white display-6">+12k</h3>
-                <p class="text-muted">Reservas Mensais</p>
+                <h3 class="fw-bold text-white display-6" style="animation: fadeInUp 0.6s ease-out 0.1s backwards;">+12k</h3>
+                <p class="text-muted" style="animation: fadeInUp 0.6s ease-out 0.15s backwards;">Reservas Mensais</p>
             </div>
             <div class="col-4">
-                <h3 class="fw-bold text-white display-6">99.9%</h3>
-                <p class="text-muted">Disponibilidade</p>
+                <h3 class="fw-bold text-white display-6" style="animation: fadeInUp 0.6s ease-out 0.2s backwards;">99.9%</h3>
+                <p class="text-muted" style="animation: fadeInUp 0.6s ease-out 0.25s backwards;">Disponibilidade</p>
             </div>
             <div class="col-4">
-                <h3 class="fw-bold text-white display-6">-8h</h3>
-                <p class="text-muted">Economia/Semana</p>
+                <h3 class="fw-bold text-white display-6" style="animation: fadeInUp 0.6s ease-out 0.3s backwards;">-8h</h3>
+                <p class="text-muted" style="animation: fadeInUp 0.6s ease-out 0.35s backwards;">Economia/Semana</p>
             </div>
         </div>
     </div>

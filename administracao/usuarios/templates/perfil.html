@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil do Usuário - AgendeAqui{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #6366f1 0%, #3b4cca 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        border: 4px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .profile-info h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-info p {
+        opacity: 0.9;
+        margin: 0.3rem 0;
+    }
+
+    .card-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-field:last-child {
+        border-bottom: none;
+    }
+
+    .field-label {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .field-value {
+        color: #0f172a;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #0f172a;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-primary-custom {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-primary-custom:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary-custom {
+        background: #e2e8f0;
+        color: #0f172a;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #cbd5e1;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e7ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f46e5;
+        flex-shrink: 0;
+    }
+
+    .activity-content h5 {
+        color: #0f172a;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+    }
+
+    .activity-content p {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .badge-custom {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 1rem 1.5rem;
+        color: #64748b;
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+        color: #6366f1;
+        border-bottom-color: #6366f1;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem;
+        }
+
+        .card-section {
+            padding: 1.5rem;
+        }
+
+        .profile-header {
+            text-align: center;
+        }
+
+        .tabs {
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1rem;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Header do Perfil -->
+    <div class="profile-header">
+        <div class="d-flex align-items-center">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-info">
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <p>
+                    <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                </p>
+                <p>
+                    <i class="fas fa-id-badge me-2"></i>
+                    {% if user.groups.exists %}
+                        {% for group in user.groups.all %}
+                            <span class="badge-custom">{{ group.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="badge-custom">Usuário</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas -->
+    <div style="background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 0 2rem;">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dados">
+                <i class="fas fa-user-circle me-1"></i>Dados Pessoais
+            </button>
+            <button class="tab-btn" data-tab="seguranca">
+                <i class="fas fa-lock me-1"></i>Segurança
+            </button>
+            <button class="tab-btn" data-tab="atividades">
+                <i class="fas fa-history me-1"></i>Histórico de Atividades
+            </button>
+        </div>
+    </div>
+
+    <!-- Aba 1: Dados Pessoais -->
+    <div id="dados" class="tab-content active">
+        <div class="card-section">
+            <div class="section-title">
+                <i class="fas fa-user-circle" style="color: #6366f1;"></i>Informações Pessoais
+            </div>
+            
+            <div class="info-field">
+                <span class="field-label">Nome Completo:</span>
+                <span class="field-value">{{ user.get_full_name|default:"Não informado" }}</span>
+            </div>
+            <div class="info-field">
+                <span class="field-label">Email:</span>
+                <span class="field-value">{{ user.email }}</span>
+            </div>
+            <div class="info-field">
+                <span class="field-label">Cargo/Função:</span>
+                <span class="field-value">
+                    {% if user.groups.exists %}
+                        {% for group in user.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-field">
+                <span class="field-label">Data de Cadastro:</span>
+                <span class="field-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+            </div>
+            <div class="info-field">
+                <span class="field-label">Último Acesso:</span>
+                <span class="field-value">{{ user.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</span>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button class="btn-primary-custom" onclick="document.getElementById('editForm').style.display = 'block'">
+                    <i class="fas fa-edit me-2"></i>Editar Informações
+                </button>
+            </div>
+        </div>
+
+        <!-- Formulário de Edição (Oculto) -->
+        <div id="editForm" style="display: none;" class="card-section">
+            <div class="section-title">
+                <i class="fas fa-pencil-alt" style="color: #6366f1;"></i>Editar Dados
+            </div>
+
+            <form method="post" action="{% url 'perfil:update' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="first_name">Nome:</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Sobrenome:</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                    <button type="button" class="btn-secondary-custom" onclick="document.getElementById('editForm').style.display = 'none'">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aba 2: Segurança -->
+    <div id="seguranca" class="tab-content">
+        <div class="card-section">
+            <div class="section-title">
+                <i class="fas fa-lock" style="color: #6366f1;"></i>Alterar Senha
+            </div>
+
+            <form method="post" action="{% url 'perfil:change_password' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="old_password">Senha Atual:</label>
+                    <input type="password" id="old_password" name="old_password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password1">Nova Senha:</label>
+                    <input type="password" id="new_password1" name="new_password1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password2">Confirmar Nova Senha:</label>
+                    <input type="password" id="new_password2" name="new_password2" required>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    A senha deve ter pelo menos 8 caracteres.
+                </div>
+
+                <button type="submit" class="btn-primary-custom">
+                    <i class="fas fa-key me-2"></i>Atualizar Senha
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aba 3: Histórico de Atividades -->
+    <div id="atividades" class="tab-content">
+        <div class="card-section">
+            <div class="section-title">
+                <i class="fas fa-history" style="color: #6366f1;"></i>Histórico de Agendamentos
+            </div>
+
+            {% if historico_agendamentos %}
+                {% for agendamento in historico_agendamentos %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h5>{{ agendamento.sala.nome }}</h5>
+                        <p>
+                            <strong>Data:</strong> {{ agendamento.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ agendamento.horario_inicio|time:"H:i" }} - {{ agendamento.horario_fim|time:"H:i" }}<br>
+                            <strong>Status:</strong> 
+                            <span class="badge" style="background: {% if agendamento.status == 'Aprovado' %}#dcfce7{% elif agendamento.status == 'Pendente' %}#fef3c7{% else %}#fee2e2{% endif %}; color: {% if agendamento.status == 'Aprovado' %}#166534{% elif agendamento.status == 'Pendente' %}#92400e{% else %}#991b1b{% endif %};">
+                                {{ agendamento.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: #64748b;">
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: #cbd5e1;"></i>
+                    <p>Nenhum agendamento realizado ainda.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Controle de abas
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.getAttribute('data-tab');
+            
+            // Remove classe active de todos
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Adiciona classe active ao clicado
+            button.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        });
+    });
+</script>
+
+{% endblock %}

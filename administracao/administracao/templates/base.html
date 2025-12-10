@@ -280,7 +280,7 @@
 <body>
     <!-- Verifica se a rota atual é Login, Cadastro ou Home para esconder a Sidebar -->
     {% with request.resolver_match.url_name as url_name %}
-        {% if url_name != 'login' and url_name != 'root_login' and url_name != 'cadastro' and url_name != 'home' and url_name != 'landinpage' %}
+        {% if url_name != 'login' and url_name != 'root_login' and url_name != 'cadastro' and url_name != 'landinpage' %}
         
         <!-- Mobile Header (Só aparece em telas pequenas) -->
         <div class="mobile-header">
@@ -314,6 +314,12 @@
                     <a href="{% url 'acesso_rapido' %}" class="nav-link-custom {% if request.path == '/' or 'acesso_rapido' in request.path %}active{% endif %}">
                         <i class="fas fa-accessible-icon"></i>
                         <span>Acesso Rápido</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'dashboard:home' %}" class="nav-link-custom {% if 'dashboard' in request.path %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -376,7 +382,7 @@
         {% endif %}
 
         <!-- Conteúdo Principal -->
-        <main class="main-content" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'home' or url_name == 'landinpage' %}margin-left:0;width:100%;max-width:100%;padding:0;margin-top:0;{% endif %}">
+        <main class="main-content" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landinpage' %}margin-left:0;width:100%;max-width:100%;padding:0;margin-top:0;{% endif %}">
             
             {% if messages and url_name != 'login' and url_name != 'cadastro' %}
                 <div class="container-fluid px-4 mt-3">
@@ -393,7 +399,7 @@
             {% endblock %}
         </main>
 
-        <footer class="footer" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'home' or url_name == 'landinpage' %}margin-left:0;width:100%;{% endif %}">
+        <footer class="footer" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landinpage' %}margin-left:0;width:100%;{% endif %}">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4 col-md-6 mb-4 mb-lg-0 footer-left text-center text-md-start">
