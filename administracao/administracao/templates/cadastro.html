@@ -5,14 +5,16 @@
 {% block content %}
 <style>
     body {
-    /* Garante que o fundo do corpo da página seja igual ao fundo do login */
-    background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%) !important;
-    margin: 0;
-    padding: 0;
-}
-    /* --- Layout Principal --- */
+        background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%) !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    * { box-sizing: border-box; }
+
     .cadastro-main {
         min-height: 100vh;
+        min-height: 100dvh;
         width: 100%;
         display: flex;
         align-items: center;
@@ -23,8 +25,9 @@
 
     .cadastro-card {
         display: flex;
-        width: 850px;
-        min-height: 550px;
+        width: 100%;
+        max-width: 900px;
+        min-height: 650px;
         border-radius: 20px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         overflow: hidden;
@@ -32,7 +35,7 @@
         animation: slideUp 0.5s ease forwards;
     }
 
-    /* --- Lado Esquerdo (Azul) --- */
+    /* --- Lado Esquerdo (Azul - Branding) --- */
     .cadastro-left {
         background: linear-gradient(135deg, #3b4cca 0%, #1e293b 100%);
         color: #fff;
@@ -52,10 +55,28 @@
         opacity: 0.3;
     }
 
-    .icon-brand { font-size: 3rem; margin-bottom: 1rem; color: #fff; }
-    .system-title { font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
-    .system-desc { font-size: 1.1rem; opacity: 0.9; font-weight: 400; margin-bottom: 2rem; line-height: 1.4; }
-    
+    .icon-brand {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .system-title { 
+        font-family: 'Inter', sans-serif; 
+        font-size: 2rem; 
+        font-weight: 800; 
+        margin-bottom: 0.5rem; 
+        letter-spacing: -0.5px; 
+    }
+
+    .system-desc { 
+        font-size: 1.1rem; 
+        opacity: 0.9; 
+        font-weight: 400; 
+        margin-bottom: 2rem; 
+        line-height: 1.4; 
+    }
+
     .secure-badge {
         margin-top: auto;
         background: rgba(255, 255, 255, 0.1);
@@ -77,27 +98,27 @@
         flex-direction: column;
         justify-content: center;
         background: #fff;
+        overflow-y: auto;
     }
 
-    .welcome-text {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 5px;
+    .welcome-text { 
+        font-size: 1.8rem; 
+        font-weight: 700; 
+        color: #0f172a; 
+        margin-bottom: 5px; 
     }
 
-    .subtitle-text {
-        color: #64748b;
-        font-size: 0.95rem;
-        margin-bottom: 25px;
+    .subtitle-text { 
+        color: #64748b; 
+        font-size: 0.95rem; 
+        margin-bottom: 25px; 
     }
 
-    /* --- Inputs e Labels (CORREÇÃO AQUI) --- */
+    /* --- Inputs e Labels --- */
     .input-group {
         margin-bottom: 18px;
-        /* As linhas abaixo garantem que fique um embaixo do outro */
         display: flex;
-        flex-direction: column; 
+        flex-direction: column;
         align-items: flex-start;
         width: 100%;
     }
@@ -106,33 +127,41 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 8px; /* Espaço entre o título e o campo */
+        margin-bottom: 8px;
         color: #334155;
         font-weight: 600;
         font-size: 0.9rem;
     }
 
+    .label-with-icon label {
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin: 0;
+        cursor: pointer;
+    }
+
     .label-with-icon i {
         color: #3b4cca;
         font-size: 1rem;
-        width: 20px; /* Garante alinhamento fixo dos ícones */
+        width: 20px;
         text-align: center;
     }
 
     .input-wrapper {
         width: 100%;
+        position: relative;
     }
 
-    .input-wrapper input, input[type="text"], input[type="password"], input[type="email"] {
+    .input-wrapper input {
         width: 100%;
-        padding: 12px 15px; 
+        padding: 12px 15px;
         border: 2px solid #e2e8f0;
         border-radius: 10px;
         font-size: 0.95rem;
         background: #f8fafc;
         color: #0f172a;
-        transition: all 0.2s ease;
-        box-sizing: border-box; /* Garante que padding não estoure a largura */
+        transition: all 0.3s ease;
     }
 
     .input-wrapper input:focus {
@@ -153,8 +182,12 @@
         padding: 14px;
         font-size: 1rem;
         cursor: pointer;
-        margin-top: 15px;
+        margin-top: 20px;
         transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
     .btn-submit:hover {
@@ -170,17 +203,35 @@
         color: #64748b;
     }
 
-    .login-redirect a { color: #3b4cca; text-decoration: none; font-weight: 700; }
-    .login-redirect a:hover { text-decoration: underline; }
+    .login-redirect a { 
+        color: #3b4cca; 
+        text-decoration: none; 
+        font-weight: 700; 
+    }
+
+    .login-redirect a:hover { 
+        text-decoration: underline; 
+    }
 
     .cadastro-error {
-        background: #fee2e2; color: #ef4444;
-        padding: 10px; border-radius: 8px; margin-top: 15px;
-        font-size: 0.9rem; text-align: center; border: 1px solid #fecaca;
+        background: #fee2e2; 
+        color: #ef4444; 
+        padding: 12px;
+        border-radius: 8px; 
+        margin-top: 15px; 
+        font-size: 0.9rem;
+        text-align: center; 
+        border: 1px solid #fecaca;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 8px;
     }
-    
-    .field-error {
-        color: #dc2626; font-size: 0.8rem; margin-top: 4px;
+
+    .field-error { 
+        color: #dc2626; 
+        font-size: 0.8rem; 
+        margin-top: 4px; 
     }
 
     @keyframes slideUp {
@@ -188,28 +239,87 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Mobile */
-    @media (max-width: 900px) {
-        .cadastro-card { flex-direction: column; width: 100%; max-width: 400px; min-height: auto; }
-        .cadastro-left { display: none; }
-        .cadastro-right { width: 100%; padding: 30px; }
+    /* RESPONSIVIDADE */
+    @media (max-width: 1024px) {
+        .cadastro-card {
+            max-width: 90%;
+            min-height: auto;
+        }
+        .cadastro-left, .cadastro-right {
+            padding: 2rem;
+        }
+        .system-title { font-size: 1.6rem; }
+        .icon-brand { font-size: 2.5rem; }
+    }
+
+    @media (max-width: 768px) {
+        .cadastro-card {
+            flex-direction: column;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .cadastro-left {
+            display: none;
+        }
+
+        .cadastro-right {
+            width: 100%;
+            padding: 2.5rem;
+        }
+        
+        .welcome-text { 
+            text-align: center; 
+            font-size: 1.6rem; 
+        }
+
+        .subtitle-text { 
+            text-align: center; 
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cadastro-main { 
+            padding: 15px; 
+        }
+        
+        .cadastro-right {
+            padding: 1.5rem;
+        }
+
+        .welcome-text { 
+            font-size: 1.5rem; 
+        }
+        
+        .input-wrapper input {
+            font-size: 16px; 
+            padding: 10px 12px;
+        }
+
+        .btn-submit { 
+            padding: 12px; 
+        }
     }
 </style>
 
 <div class="cadastro-main">
     <div class="cadastro-card">
         <div class="cadastro-left">
-            <div class="icon-brand"><i class="fas fa-calendar-alt"></i></div>
+            <div class="icon-brand">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
             <div class="system-title">AgendeAqui</div>
             <div class="system-desc">Organize reservas, otimize espaços e facilite a gestão acadêmica em um só lugar.</div>
-            <div class="secure-badge"><i class="fas fa-lock"></i> Cadastro Seguro</div>
+            <div class="secure-badge">
+                <i class="fas fa-lock"></i> Cadastro Seguro
+            </div>
         </div>
 
         <div class="cadastro-right">
             <div class="welcome-text">Crie sua conta</div>
             <div class="subtitle-text">Preencha os dados para se cadastrar</div>
             
-            <form method="post">
+            <form method="post" id="cadastroForm">
                 {% csrf_token %}
                 
                 <div class="input-group">
@@ -264,16 +374,24 @@
                     {% endif %}
                 </div>
 
-                <button type="submit" class="btn-submit">CADASTRAR</button>
+                <button type="submit" class="btn-submit">
+                    CADASTRAR <i class="fas fa-user-plus"></i>
+                </button>
+
+                {% if form.non_field_errors %}
+                    <div class="cadastro-error">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.non_field_errors.0 }}
+                    </div>
+                {% elif form.errors %}
+                    <div class="cadastro-error">
+                        <i class="fas fa-exclamation-circle"></i> Verifique os dados informados.
+                    </div>
+                {% endif %}
+
+                <div class="login-redirect">
+                    Já tem conta? <a href="{% url 'login' %}">Faça login aqui</a>
+                </div>
             </form>
-
-            {% if form.errors %}
-                <div class="cadastro-error">Verifique os dados informados.</div>
-            {% endif %}
-
-            <div class="login-redirect">
-                Já tem conta? <a href="{% url 'login' %}">Faça login aqui</a>
-            </div>
         </div>
     </div>
 </div>
@@ -283,8 +401,8 @@
         const inputs = [
             {id: 'id_username', ph: 'Seu usuário'},
             {id: 'id_email', ph: 'seu@email.com'},
-            {id: 'id_password1', ph: '********'},
-            {id: 'id_password2', ph: '********'}
+            {id: 'id_password1', ph: '••••••••'},
+            {id: 'id_password2', ph: '••••••••'}
         ];
 
         inputs.forEach(field => {

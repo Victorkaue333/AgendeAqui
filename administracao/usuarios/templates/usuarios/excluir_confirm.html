@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excluir Usuário - AgendeAqui{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .excluir-usuario-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .danger-header {
+        text-align: center;
+        padding: 2rem;
+        background: #fee2e2;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #dc2626;
+    }
+
+    .danger-header h1 {
+        color: #991b1b;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-size: 1.75rem;
+    }
+
+    .danger-header p {
+        color: #7f1d1d;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .user-info {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px solid #e2e8f0;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .warning-section {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .warning-section h3 {
+        margin: 0 0 1rem 0;
+        color: #b45309;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .warning-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .warning-list li {
+        color: #92400e;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .warning-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .warning-list i {
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+        color: #f59e0b;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .form-group input.error {
+        border-color: #dc2626;
+    }
+
+    .form-group .help-text {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-group .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .form-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e1;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background: #b91c1c;
+    }
+
+    .btn-danger:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+        color: #64748b;
+    }
+
+    .confirmation-text {
+        background: #f8f8f8;
+        border: 1px dashed #dc2626;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-top: 1rem;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .excluir-usuario-container {
+            padding: 1rem;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .danger-header {
+            padding: 1.5rem;
+        }
+
+        .danger-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .form-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="excluir-usuario-container">
+    <div class="form-card">
+        <!-- Header de Perigo -->
+        <div class="danger-header">
+            <h1>
+                <i class="fas fa-exclamation-triangle"></i>
+                Excluir Usuário
+            </h1>
+            <p>Esta ação é irreversível</p>
+        </div>
+
+        <!-- Informações do Usuário -->
+        <div class="user-info">
+            <div class="info-row">
+                <span class="info-label">👤 Usuário:</span>
+                <span class="info-value">{{ usuario.get_full_name|default:usuario.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📧 Email:</span>
+                <span class="info-value">{{ usuario.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tipo:</span>
+                <span class="info-value">
+                    {% if usuario.perfil.tipo == 'PRO' %}
+                        👨‍🏫 Professor
+                    {% elif usuario.perfil.tipo == 'COO' %}
+                        👩‍💼 Coordenador
+                    {% else %}
+                        🛠️ Admin
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📅 Cadastro:</span>
+                <span class="info-value">{{ usuario.date_joined|date:"d/m/Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Avisos -->
+        <div class="warning-section">
+            <h3>
+                <i class="fas fa-exclamation-circle"></i>
+                Consequências da Exclusão
+            </h3>
+            <ul class="warning-list">
+                <li>
+                    <i class="fas fa-check"></i>
+                    O usuário não poderá mais fazer login no sistema
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    Seu perfil e dados pessoais serão removidos
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    <strong>ATENÇÃO:</strong> Agendamentos podem ser afetados
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    Um registro será mantido no histórico de auditoria
+                </li>
+                <li>
+                    <i class="fas fa-check"></i>
+                    <strong>Esta ação NÃO PODE ser desfeita</strong>
+                </li>
+            </ul>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background: #fee2e2; border-left: 4px solid #dc2626; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <i class="fas fa-exclamation-circle"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Confirmação -->
+        <form method="post" id="form-excluir" onsubmit="return confirmarExclusao();">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="confirmacao">
+                    <i class="fas fa-keyboard"></i> Digite o nome completo para confirmar
+                </label>
+                <input 
+                    type="text" 
+                    id="confirmacao" 
+                    name="confirmacao"
+                    placeholder="Escreva: {{ usuario.get_full_name|default:usuario.username }}"
+                    required
+                >
+                <div class="help-text">
+                    <i class="fas fa-info-circle"></i>
+                    Para sua segurança, você deve digitar o nome completo do usuário exatamente
+                </div>
+            </div>
+
+            <div class="confirmation-text">
+                <strong>Nome esperado:</strong> {{ usuario.get_full_name|default:usuario.username }}
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <a href="{% url 'usuarios:usuarios_list' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger" id="btn-excluir">
+                    <i class="fas fa-trash"></i> Excluir Usuário
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const nomeEsperado = '{{ usuario.get_full_name|default:usuario.username }}';
+    const inputConfirmacao = document.getElementById('confirmacao');
+    const btnExcluir = document.getElementById('btn-excluir');
+
+    inputConfirmacao.addEventListener('input', function() {
+        const nomesCoincide = this.value.trim() === nomeEsperado;
+        btnExcluir.disabled = !nomesCoincide;
+        
+        if (this.value.length > 0 && !nomesCoincide) {
+            this.classList.add('error');
+        } else {
+            this.classList.remove('error');
+        }
+    });
+
+    function confirmarExclusao() {
+        const mensagem = `⚠️ ATENÇÃO!\n\nVocê está prestes a EXCLUIR PERMANENTEMENTE o usuário:\n\n"${nomeEsperado}"\n\nEsta ação NÃO PODE ser desfeita!\n\nTem certeza absoluta?`;
+        return confirm(mensagem);
+    }
+</script>
+{% endblock %}

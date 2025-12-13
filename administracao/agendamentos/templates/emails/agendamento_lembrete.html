@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembrete de Agendamento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .info-box {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .info-value {
+            color: #0f172a;
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 20px 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">⏰</div>
+            <h1>Lembrete: Agendamento Amanhã!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Olá <strong>{{ usuario.first_name|default:usuario.username }}</strong>,</p>
+            
+            <p>Este é um lembrete de que você tem um agendamento <strong>amanhã</strong>!</p>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">📍 Sala:</span>
+                    <span class="info-value">{{ agendamento.sala.nome }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📅 Data:</span>
+                    <span class="info-value">{{ agendamento.data|date:"d/m/Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">⏰ Horário:</span>
+                    <span class="info-value">{{ agendamento.horario_inicio|time:"H:i" }} - {{ agendamento.horario_fim|time:"H:i" }}</span>
+                </div>
+                {% if agendamento.sala.bloco %}
+                <div class="info-row">
+                    <span class="info-label">🏢 Bloco:</span>
+                    <span class="info-value">{{ agendamento.sala.bloco.nome }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <p>Não se esqueça de chegar com antecedência. Caso precise cancelar, faça isso com pelo menos 24 horas de antecedência.</p>
+        </div>
+        
+        <div class="footer">
+            <p>AgendeAqui - Sistema de Gestão de Espaços Acadêmicos</p>
+            <p>Este é um email automático, não responda.</p>
+        </div>
+    </div>
+</body>
+</html>

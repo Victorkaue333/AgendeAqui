@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if acao %}{{ acao }}{% else %}Novo Agendamento{% endif %} - AgendeAqui{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+
+    .form-card h2 {
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-card h2 i {
+        color: #6366f1;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        outline: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: #6366f1;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1;
+    }
+
+    .error-message {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-message ul {
+        margin: 0.5rem 0 0;
+        padding-left: 1.25rem;
+    }
+
+    .error-message li {
+        margin-bottom: 0.25rem;
+    }
+
+    .info-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0284c7;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        color: #0c4a6e;
+    }
+
+    .info-box i {
+        margin-right: 0.5rem;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2>
+            <i class="fas fa-calendar-plus"></i>
+            {% if acao %}{{ acao }}{% else %}Novo Agendamento{% endif %}
+        </h2>
+
+        {% if form.non_field_errors %}
+        <div class="error-message">
+            <strong>Erro ao processar o formulário:</strong>
+            <ul>
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>Importante:</strong> Solicitações são enviadas para aprovação pela coordenação. 
+            Você será notificado quando sua solicitação for processada.
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- Sala -->
+            <div class="form-group">
+                <label for="{{ form.sala.id_for_label }}" class="form-label">
+                    <i class="fas fa-door-open"></i> {{ form.sala.label }}
+                </label>
+                {{ form.sala }}
+                {% if form.sala.errors %}
+                <div class="error-message" style="margin-top: 0.5rem; padding: 0.5rem; margin-bottom: 0;">
+                    {{ form.sala.errors }}
+                </div>
+                {% endif %}
+                {% if form.sala.help_text %}
+                <span class="form-text">{{ form.sala.help_text|safe }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Data -->
+            <div class="form-group">
+                <label for="{{ form.data.id_for_label }}" class="form-label">
+                    <i class="fas fa-calendar-alt"></i> {{ form.data.label }}
+                </label>
+                {{ form.data }}
+                {% if form.data.errors %}
+                <div class="error-message" style="margin-top: 0.5rem; padding: 0.5rem; margin-bottom: 0;">
+                    {{ form.data.errors }}
+                </div>
+                {% endif %}
+                {% if form.data.help_text %}
+                <span class="form-text">{{ form.data.help_text|safe }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Horários em grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- Horário de Início -->
+                <div class="form-group">
+                    <label for="{{ form.horario_inicio.id_for_label }}" class="form-label">
+                        <i class="fas fa-clock"></i> {{ form.horario_inicio.label }}
+                    </label>
+                    {{ form.horario_inicio }}
+                    {% if form.horario_inicio.errors %}
+                    <div class="error-message" style="margin-top: 0.5rem; padding: 0.5rem; margin-bottom: 0;">
+                        {{ form.horario_inicio.errors }}
+                    </div>
+                    {% endif %}
+                    {% if form.horario_inicio.help_text %}
+                    <span class="form-text">{{ form.horario_inicio.help_text|safe }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Horário de Fim -->
+                <div class="form-group">
+                    <label for="{{ form.horario_fim.id_for_label }}" class="form-label">
+                        <i class="fas fa-clock"></i> {{ form.horario_fim.label }}
+                    </label>
+                    {{ form.horario_fim }}
+                    {% if form.horario_fim.errors %}
+                    <div class="error-message" style="margin-top: 0.5rem; padding: 0.5rem; margin-bottom: 0;">
+                        {{ form.horario_fim.errors }}
+                    </div>
+                    {% endif %}
+                    {% if form.horario_fim.help_text %}
+                    <span class="form-text">{{ form.horario_fim.help_text|safe }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Motivo -->
+            <div class="form-group">
+                <label for="{{ form.motivo.id_for_label }}" class="form-label">
+                    <i class="fas fa-align-left"></i> {{ form.motivo.label }}
+                </label>
+                {{ form.motivo }}
+                {% if form.motivo.errors %}
+                <div class="error-message" style="margin-top: 0.5rem; padding: 0.5rem; margin-bottom: 0;">
+                    {{ form.motivo.errors }}
+                </div>
+                {% endif %}
+                {% if form.motivo.help_text %}
+                <span class="form-text">{{ form.motivo.help_text|safe }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <a href="{% url 'agendamentos:agendamentos' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Solicitar Agendamento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Validação client-side simples
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const inicio = document.querySelector('#id_horario_inicio').value;
+        const fim = document.querySelector('#id_horario_fim').value;
+        
+        if (inicio && fim && inicio >= fim) {
+            e.preventDefault();
+            alert('O horário de fim deve ser posterior ao horário de início.');
+        }
+    });
+</script>
+{% endblock %}

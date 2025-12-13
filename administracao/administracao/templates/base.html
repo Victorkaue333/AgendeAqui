@@ -41,6 +41,32 @@
             flex-direction: column;
         }
 
+        /* Botão Hamburger */
+        .hamburger-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background: #6366f1;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            background: #4f46e5;
+            transform: scale(1.05);
+        }
+
+        .hamburger-btn i {
+            color: white;
+            font-size: 1.3rem;
+        }
+
         /* Ajuste para páginas que usam tema escuro (Login/Landing) */
         body.dark-theme {
             background-color: var(--bg-dark);
@@ -67,6 +93,28 @@
             transition: transform 0.3s ease;
             overflow-y: auto;
             border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
         }
 
         .logo {
@@ -135,15 +183,38 @@
             transition: margin-left 0.3s ease, width 0.3s ease;
         }
 
+        .main-content.expanded {
+            margin-left: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
         /* --- RODAPÉ (FOOTER) MELHORADO --- */
         .footer {
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             background-color: #0f172a; /* Fundo escuro sólido */
             color: #cbd5e1;
-            padding: 60px 0 30px 0;
+            padding: 60px 30px 30px 30px;
             border-top: 1px solid var(--border-color);
             transition: margin-left 0.3s ease, width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .footer .row {
+            width: 100%;
         }
 
         .footer h5 {
@@ -203,19 +274,82 @@
         /* --- MOBILE HEADER --- */
         .mobile-header {
             display: none;
-            align-items: center; justify-content: space-between;
-            padding: 15px 20px;
-            background: rgba(15, 23, 42, 0.95); /* Fundo escuro com leve transparência */
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
             color: white;
-            position: fixed; top: 0; left: 0; width: 100%;
-            z-index: 1001;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            z-index: 1050;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        .mobile-header .mobile-logo {
+            flex: 1;
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 15px;
+        }
+
+        .mobile-header .mobile-logo i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .mobile-header .mobile-logo span {
+            white-space: nowrap;
+        }
+
         .hamburger-btn {
-            background: none; border: none; color: white;
-            font-size: 24px; cursor: pointer; padding: 5px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0.1));
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            color: #6366f1;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 10px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .hamburger-btn:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(99, 102, 241, 0.3));
+            border-color: #6366f1;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .hamburger-btn:active {
+            transform: scale(0.95);
+        }
+
+        .hamburger-btn i {
+            color: inherit;
+        }
+
+        .mobile-header .mobile-logo i {
+            font-size: 1.3rem;
         }
 
         /* Overlay Mobile */
@@ -236,8 +370,8 @@
             .main-content { padding: 30px; }
         }
 
-        @media (max-width: 768px) {
-            .mobile-header { display: flex; }
+        @media (max-width: 992px) {
+            .mobile-header { display: flex !important; }
             
             .sidebar { transform: translateX(-100%); top: 0; height: 100vh; }
             .sidebar.active { transform: translateX(0); }
@@ -245,15 +379,52 @@
 
             .main-content {
                 margin-left: 0 !important; 
-                margin-top: 60px; /* Espaço para o header mobile */
+                margin-top: 70px; /* Espaço para o header mobile */
                 width: 100% !important; 
                 max-width: 100% !important;
-                padding: 20px; padding-bottom: 80px;
+                padding: 20px;
+                padding-bottom: 80px;
             }
 
             .footer { margin-left: 0 !important; width: 100% !important; text-align: center; }
-            .footer-left { align-items: center; margin-bottom: 30px; }
+            .footer-left { align-items: center; margin-bottom: 30px; justify-content: center; }
             .col-lg-3, .col-md-6 { margin-bottom: 30px; }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex !important; }
+            
+            .sidebar { transform: translateX(-100%); top: 0; height: 100vh; }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay { display: block; }
+
+            .main-content {
+                margin-left: 0 !important; 
+                margin-top: 70px;
+                width: 100% !important; 
+                max-width: 100% !important;
+                padding: 15px;
+                padding-bottom: 60px;
+            }
+
+            .footer { margin-left: 0 !important; width: 100% !important; text-align: center; }
+            .footer-left { align-items: center; margin-bottom: 30px; justify-content: center; }
+            .col-lg-3, .col-md-6 { margin-bottom: 30px; }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-header { display: flex !important; padding: 10px 12px; height: 65px; }
+            .mobile-header .mobile-logo { font-size: 0.95rem; gap: 8px; padding: 0 10px; }
+            .mobile-header .mobile-logo i { font-size: 1.1rem; }
+            .hamburger-btn { width: 45px; height: 45px; padding: 8px; font-size: 24px; }
+            
+            .main-content {
+                margin-left: 0 !important; 
+                margin-top: 65px;
+                padding: 12px;
+            }
+
+            .sidebar { width: 100%; }
         }
 
         /* --- MODAL FIX (DARK THEME) --- */
@@ -274,24 +445,223 @@
             filter: invert(1) grayscale(100%) brightness(200%);
         }
 
+        /* --- SISTEMA DE FEEDBACK VISUAL --- */
+        
+        /* Toasts de Notificação */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: white;
+            border-left: 4px solid;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease-out;
+            min-width: 320px;
+            max-width: 400px;
+        }
+
+        .toast.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .toast.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .toast.info {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { color: #10b981; }
+        .toast.error .toast-icon { color: #ef4444; }
+        .toast.warning .toast-icon { color: #f59e0b; }
+        .toast.info .toast-icon { color: #3b82f6; }
+
+        .toast-message {
+            flex: 1;
+            color: #1f2937;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            flex-shrink: 0;
+            transition: color 0.2s ease;
+        }
+
+        .toast-close:hover {
+            color: #1f2937;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease-in;
+        }
+
+        /* Efeitos de Botão */
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn:not(:disabled):not(.disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:not(:disabled):not(.disabled):active {
+            transform: translateY(2px);
+        }
+
+        .btn.btn-loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn.btn-loading::after {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-left: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Ripple Effect */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Feedback Visual em Formulários */
+        .form-control:focus,
+        .form-select:focus,
+        textarea:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* Botões com Loading */
+        .btn-with-loader {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-with-loader .spinner-border {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
+
+        /* Checkbox e Radio customizados */
+        .form-check-input:checked {
+            animation: checkAnimation 0.3s ease;
+        }
+
+        @keyframes checkAnimation {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
+    <!-- Container de Toasts para Notificações -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Verifica se a rota atual é Login, Cadastro ou Home para esconder a Sidebar -->
     {% with request.resolver_match.url_name as url_name %}
-        {% if url_name != 'login' and url_name != 'root_login' and url_name != 'cadastro' and url_name != 'landinpage' %}
+        {% if url_name != 'login' and url_name != 'root_login' and url_name != 'cadastro' and url_name != 'landingpage' %}
         
         <!-- Mobile Header (Só aparece em telas pequenas) -->
         <div class="mobile-header">
             <button class="hamburger-btn" id="hamburgerBtn">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="mobile-logo font-weight-bold d-flex align-items-center gap-2">
+            <div class="mobile-logo">
                 <i class="fas fa-calendar-alt text-danger"></i>
-                AgendeAqui
+                <span>AgendeAqui</span>
             </div>
-            <div style="width: 34px;"></div> <!-- Espaçador para centralizar logo -->
         </div>
 
         <!-- Overlay para fechar menu ao clicar fora -->
@@ -340,6 +710,20 @@
                         <span>Relatórios</span>
                     </a>
                 </li>
+                {% if request.user.perfil.tipo == 'ADM' %}
+                <li class="nav-item">
+                    <a href="{% url 'usuarios:usuarios_list' %}" class="nav-link-custom {% if 'usuarios' in request.path and 'perfil' not in request.path %}active{% endif %}">
+                        <i class="fas fa-users"></i>
+                        <span>Usuários</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a href="{% url 'usuarios:perfil' %}" class="nav-link-custom {% if 'perfil' in request.path %}active{% endif %}">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Perfil</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="logout-link">
@@ -370,8 +754,8 @@
                         <!-- Form POST para corrigir Erro 405 e redirecionar -->
                         <form method="post" action="{% url 'logout' %}" class="m-0">
                             {% csrf_token %}
-                            <!-- Redireciona para 'landinpage' após o logout -->
-                            <input type="hidden" name="next" value="{% url 'landinpage' %}">
+                            <!-- Redireciona para 'landingpage' após o logout -->
+                            <input type="hidden" name="next" value="{% url 'landingpage' %}">
                             <button type="submit" class="btn btn-danger px-4">Sair</button>
                         </form>
                     </div>
@@ -382,7 +766,7 @@
         {% endif %}
 
         <!-- Conteúdo Principal -->
-        <main class="main-content" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landinpage' %}margin-left:0;width:100%;max-width:100%;padding:0;margin-top:0;{% endif %}">
+        <main class="main-content" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landingpage' %}margin-left:0;width:100%;max-width:100%;padding:0;margin-top:0;{% endif %}">
             
             {% if messages and url_name != 'login' and url_name != 'cadastro' %}
                 <div class="container-fluid px-4 mt-3">
@@ -399,23 +783,22 @@
             {% endblock %}
         </main>
 
-        <footer class="footer" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landinpage' %}margin-left:0;width:100%;{% endif %}">
+        <footer class="footer" style="{% if url_name == 'login' or url_name == 'root_login' or url_name == 'cadastro' or url_name == 'landingpage' %}margin-left:0;width:100%;{% endif %}">
             <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0 footer-left text-center text-md-start">
-                        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-3">
+                <div class="row w-100">
+                    <div class="col-12">
+                        <div class="footer-left d-flex align-items-center justify-content-center gap-2 mb-3">
                             <div style="width:32px; height:32px; background:#FF3333; border-radius:6px; display:flex; align-items:center; justify-content:center; color:white;">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>
                             <span style="font-size:1.25rem; font-weight:700; color:white;">AgendeAqui</span>
                         </div>
-                        <p style="font-size:0.9rem; line-height:1.6; max-width: 300px; margin: 0 auto 0 0;">
+                        <p style="font-size:0.9rem; line-height:1.6; max-width: 300px; margin: 0 auto 1.5rem auto;">
                             A solução completa para gestão de espaços acadêmicos. 
                         </p>
-                    </div>
-
-                    <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-                        &copy; 2025 AgendeAqui. Todos os direitos reservados.
+                        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+                            &copy; 2025 AgendeAqui. Todos os direitos reservados.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -458,16 +841,93 @@
         const navLinks = document.querySelectorAll('.sidebar .nav-link-custom');
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
+                if (window.innerWidth <= 992) {
                     closeSidebar();
                 }
             });
         });
 
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
+            if (window.innerWidth > 992) {
                 closeSidebar();
             }
+        });
+
+        /* === SISTEMA DE FEEDBACK VISUAL === */
+        
+        // Função para mostrar toasts
+        function showToast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '<i class="fas fa-check-circle toast-icon"></i>',
+                error: '<i class="fas fa-exclamation-circle toast-icon"></i>',
+                warning: '<i class="fas fa-exclamation-triangle toast-icon"></i>',
+                info: '<i class="fas fa-info-circle toast-icon"></i>'
+            };
+            
+            toast.innerHTML = `
+                ${icons[type] || icons.info}
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        }
+
+        // Adicionar ripple effect aos botões
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.className = 'ripple';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Feedback visual ao enviar formulários
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.classList.add('btn-loading');
+                    submitBtn.disabled = true;
+                }
+            });
+        });
+
+        // Mostrar toasts de mensagens Django
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                let type = 'info';
+                if (alert.classList.contains('alert-success')) type = 'success';
+                else if (alert.classList.contains('alert-danger')) type = 'error';
+                else if (alert.classList.contains('alert-warning')) type = 'warning';
+                
+                const message = alert.textContent.trim();
+                showToast(message, type, 5000);
+            });
         });
     </script>
     

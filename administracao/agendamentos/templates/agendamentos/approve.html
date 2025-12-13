@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Revisar Agendamento - AgendeAqui{% endblock %}
+
+{% block content %}
+<style>
+    .container-wrapper {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+    }
+
+    .review-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .card-header-banner {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .banner-icon {
+        font-size: 3rem;
+    }
+
+    .banner-text h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .banner-text p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .info-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: #6366f1;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .motivo-box {
+        background: #f0f9ff;
+        border-left: 4px solid #0284c7;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .motivo-label {
+        font-size: 0.85rem;
+        color: #0c4a6e;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .motivo-text {
+        color: #0f172a;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Seção de Decisão */
+    .decision-section {
+        background: #f0f4ff;
+        border: 2px solid #6366f1;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .decision-title {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .radio-group {
+        margin-bottom: 2rem;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        border: 2px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+
+    .radio-option:hover {
+        border-color: #6366f1;
+        background: white;
+    }
+
+    .radio-option input[type="radio"] {
+        margin-top: 0.25rem;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+
+    .radio-option input[type="radio"]:checked {
+        accent-color: #6366f1;
+    }
+
+    .radio-label {
+        flex: 1;
+    }
+
+    .radio-title {
+        font-weight: 600;
+        color: #0f172a;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .radio-desc {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    /* Justificativa de Recusa */
+    .justificativa-group {
+        display: none;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #fecaca;
+    }
+
+    .justificativa-group.visible {
+        display: block;
+    }
+
+    .justificativa-label {
+        font-weight: 600;
+        color: #0f172a;
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    .justificativa-text {
+        display: block;
+        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+        transition: all 0.2s ease;
+    }
+
+    .justificativa-text:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        outline: none;
+    }
+
+    .justificativa-help {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    /* Botões */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: #6366f1;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1;
+    }
+</style>
+
+<div class="container-wrapper">
+    <div class="review-container">
+        <div class="review-card">
+            <!-- Header Banner -->
+            <div class="card-header-banner">
+                <div class="banner-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="banner-text">
+                    <h2>Revisar Solicitação</h2>
+                    <p>Agendamento #{{ agendamento.id }} — Tomada uma decisão?</p>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+                <!-- Informações da Solicitação -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Dados da Solicitação
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Solicitante</div>
+                            <div class="info-value">{{ usuario_nome }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Sala Solicitada</div>
+                            <div class="info-value">{{ sala_nome }}</div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Data</div>
+                            <div class="info-value">
+                                {{ agendamento.data|date:"d/m/Y" }}
+                                <small style="display: block; font-weight: 400; font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">
+                                    {{ agendamento.data|date:"l"|title }}
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Horário</div>
+                            <div class="info-value">
+                                {{ agendamento.horario_inicio|time:"H:i" }} 
+                                —
+                                {{ agendamento.horario_fim|time:"H:i" }}
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Capacidade</div>
+                            <div class="info-value">
+                                {{ agendamento.sala.capacidade }} pessoas
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Solicitado em</div>
+                            <div class="info-value">
+                                {{ agendamento.criado_em|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Motivo da Solicitação -->
+                {% if agendamento.motivo %}
+                <div class="info-section">
+                    <div class="section-title">
+                        <i class="fas fa-align-left"></i>
+                        Motivo
+                    </div>
+                    <div class="motivo-box">
+                        <div class="motivo-text">
+                            {{ agendamento.motivo }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Seção de Decisão -->
+                <form method="post" class="decision-section">
+                    {% csrf_token %}
+
+                    <div class="decision-title">
+                        <i class="fas fa-gavel"></i>
+                        Sua Decisão
+                    </div>
+
+                    <!-- Radio Buttons -->
+                    <div class="radio-group">
+                        <!-- Opção: Aprovar -->
+                        <label class="radio-option">
+                            <input type="radio" name="acao" value="A" checked>
+                            <div class="radio-label">
+                                <span class="radio-title">
+                                    <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i>
+                                    Aprovar
+                                </span>
+                                <span class="radio-desc">
+                                    O agendamento será confirmado e o solicitante será notificado.
+                                </span>
+                            </div>
+                        </label>
+
+                        <!-- Opção: Reprovar -->
+                        <label class="radio-option">
+                            <input type="radio" name="acao" value="R">
+                            <div class="radio-label">
+                                <span class="radio-title">
+                                    <i class="fas fa-times-circle" style="color: #ef4444; margin-right: 0.5rem;"></i>
+                                    Reprovar
+                                </span>
+                                <span class="radio-desc">
+                                    O agendamento será recusado. Uma justificativa é obrigatória.
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Justificativa (apenas se reprovar) -->
+                    <div class="justificativa-group" id="justificativa-group">
+                        <label for="id_justificativa_reprovacao" class="justificativa-label">
+                            <i class="fas fa-comment-dots" style="margin-right: 0.5rem;"></i>
+                            Motivo da Recusa
+                        </label>
+                        <textarea 
+                            id="id_justificativa_reprovacao" 
+                            name="justificativa_reprovacao" 
+                            class="justificativa-text" 
+                            placeholder="Explique o motivo da recusa para o solicitante..."></textarea>
+                        <div class="justificativa-help">
+                            Esta mensagem será compartilhada com o solicitante. Seja claro e respeitoso.
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="form-actions">
+                        <a href="{% url 'agendamentos:pendentes' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Confirmar Decisão
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mostrar/Esconder campo de justificativa conforme a seleção
+    const radioButtons = document.querySelectorAll('input[name="acao"]');
+    const justificativaGroup = document.getElementById('justificativa-group');
+
+    function toggleJustificativa() {
+        const selected = document.querySelector('input[name="acao"]:checked').value;
+        if (selected === 'R') {
+            justificativaGroup.classList.add('visible');
+        } else {
+            justificativaGroup.classList.remove('visible');
+        }
+    }
+
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', toggleJustificativa);
+    });
+
+    // Validação ao submeter
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const acao = document.querySelector('input[name="acao"]:checked').value;
+        const justificativa = document.getElementById('id_justificativa_reprovacao').value.trim();
+
+        if (acao === 'R' && !justificativa) {
+            e.preventDefault();
+            alert('Você deve fornecer uma justificativa ao reprovar um agendamento.');
+            document.getElementById('id_justificativa_reprovacao').focus();
+        }
+    });
+</script>
+{% endblock %}

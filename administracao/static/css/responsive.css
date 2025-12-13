@@ -1,6 +1,6 @@
-/* Arquivo estático mínimo colocado na pasta static raiz do projeto (ao lado do manage.py)
-   para garantir que {% static 'css/responsive.css' %} resolva durante o runserver.
-*/
+/* ============================================
+   RESPONSIVIDADE GLOBAL - AgendeAqui
+   ============================================ */
 
 /* Reset básico adicional para garantir consistência entre navegadores */
 img, svg { max-width: 100%; height: auto; }
@@ -11,7 +11,155 @@ img, svg { max-width: 100%; height: auto; }
 /* Ajustes de tipografia usados por templates */
 .text-muted { color: rgba(0,0,0,0.45); }
 
-/* Pequenas melhorias para o layout mobile */
+/* Tabelas Responsivas */
+.table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.table-responsive-wrapper table {
+    min-width: 600px;
+}
+
+/* Mobile: Cards ao invés de tabelas */
 @media (max-width: 768px) {
     .hero, .section-header { padding-left: 20px; padding-right: 20px; }
+    
+    .table-responsive-wrapper table thead {
+        display: none;
+    }
+    
+    .table-responsive-wrapper table,
+    .table-responsive-wrapper table tbody,
+    .table-responsive-wrapper table tr,
+    .table-responsive-wrapper table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .table-responsive-wrapper table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .table-responsive-wrapper table td {
+        text-align: right;
+        padding: 0.5rem;
+        position: relative;
+        padding-left: 50%;
+        border: none;
+    }
+    
+    .table-responsive-wrapper table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0.5rem;
+        width: 45%;
+        padding-right: 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+    }
+    
+    /* Formulários Mobile */
+    .form-row,
+    .filters-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        min-height: 44px;
+    }
+    
+    button, .btn {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    /* Header Section */
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .header-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-novo {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+    
+    /* Calendário FullCalendar */
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .fc .fc-toolbar-chunk {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Utility Classes */
+.hide-mobile {
+    display: block;
+}
+
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+    to { transform: rotate(360deg); }
 }

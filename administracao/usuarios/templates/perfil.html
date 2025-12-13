@@ -329,14 +329,9 @@
             </div>
         </div>
 
-        <!-- Formulário de Edição (Oculto) -->
-        <div id="editForm" style="display: none;" class="card-section">
-            <div class="section-title">
-                <i class="fas fa-pencil-alt" style="color: #6366f1;"></i>Editar Dados
-            </div>
-
-            <form method="post" action="{% url 'perfil:update' %}">
+            <form method="post" action="{% url 'usuarios:perfil' %}">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="update">
                 <div class="form-group">
                     <label for="first_name">Nome:</label>
                     <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
@@ -366,13 +361,9 @@
 
     <!-- Aba 2: Segurança -->
     <div id="seguranca" class="tab-content">
-        <div class="card-section">
-            <div class="section-title">
-                <i class="fas fa-lock" style="color: #6366f1;"></i>Alterar Senha
-            </div>
-
-            <form method="post" action="{% url 'perfil:change_password' %}">
+            <form method="post" action="{% url 'usuarios:perfil' %}">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="change_password">
                 <div class="form-group">
                     <label for="old_password">Senha Atual:</label>
                     <input type="password" id="old_password" name="old_password" required>

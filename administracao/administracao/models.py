@@ -1,3 +1,8 @@
+# Celery app initialization
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
+
 from django.db import models
 from django.conf import settings
 

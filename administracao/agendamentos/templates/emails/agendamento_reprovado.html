@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento Reprovado</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .info-box {
+            background: #f8fafc;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .info-value {
+            color: #0f172a;
+        }
+        .justification {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 20px 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">❌</div>
+            <h1>Agendamento Reprovado</h1>
+        </div>
+        
+        <div class="content">
+            <p>Olá <strong>{{ usuario.first_name|default:usuario.username }}</strong>,</p>
+            
+            <p>Infelizmente, seu agendamento foi <strong>reprovado</strong>.</p>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">📍 Sala:</span>
+                    <span class="info-value">{{ agendamento.sala.nome }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📅 Data:</span>
+                    <span class="info-value">{{ agendamento.data|date:"d/m/Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">⏰ Horário:</span>
+                    <span class="info-value">{{ agendamento.horario_inicio|time:"H:i" }} - {{ agendamento.horario_fim|time:"H:i" }}</span>
+                </div>
+            </div>
+            
+            {% if agendamento.justificativa_reprovacao %}
+            <div class="justification">
+                <strong>📋 Motivo da Reprovação:</strong>
+                <p>{{ agendamento.justificativa_reprovacao }}</p>
+            </div>
+            {% endif %}
+            
+            <p>Você pode fazer uma nova solicitação de agendamento escolhendo outro horário ou sala.</p>
+            
+            <center>
+                <a href="{{ site_url }}/agendamentos/criar/" class="button">Fazer Novo Agendamento</a>
+            </center>
+        </div>
+        
+        <div class="footer">
+            <p>AgendeAqui - Sistema de Gestão de Espaços Acadêmicos</p>
+            <p>Este é um email automático, não responda.</p>
+        </div>
+    </div>
+</body>
+</html>

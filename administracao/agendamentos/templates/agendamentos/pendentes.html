@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agendamentos Pendentes - AgendeAqui{% endblock %}
+
+{% block content %}
+<style>
+    .container-wrapper {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+    }
+
+    .header-section {
+        margin-bottom: 2rem;
+    }
+
+    .header-title {
+        color: #0f172a;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .header-subtitle {
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .alert-banner {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #b45309;
+    }
+
+    .alert-banner i {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .alert-text strong {
+        font-weight: 600;
+    }
+
+    .pendente-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #f59e0b;
+        transition: all 0.3s ease;
+    }
+
+    .pendente-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .card-title small {
+        display: block;
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+        font-weight: 400;
+    }
+
+    .status-badge {
+        background: #fef3c7;
+        color: #b45309;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 3px solid #6366f1;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .motivo-section {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 3px solid #3b82f6;
+    }
+
+    .motivo-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .motivo-text {
+        color: #0f172a;
+        line-height: 1.5;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-approve {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-view {
+        background: #6366f1;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-text {
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .pagination {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .pagination a, .pagination span {
+        padding: 0.5rem 0.75rem;
+        margin: 0.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #6366f1;
+        font-weight: 600;
+    }
+
+    .pagination a:hover {
+        background: #f0f4ff;
+    }
+
+    .pagination .current {
+        background: #6366f1;
+        color: white;
+        border-color: #6366f1;
+    }
+</style>
+
+<div class="container-wrapper">
+    <!-- Header -->
+    <div class="header-section">
+        <h1 class="header-title">
+            <i class="fas fa-hourglass-half"></i>
+            Agendamentos Pendentes
+        </h1>
+        <p class="header-subtitle">
+            Total de solicitações aguardando aprovação: <strong>{{ total_pendentes }}</strong>
+        </p>
+    </div>
+
+    <!-- Banner de ação -->
+    {% if total_pendentes > 0 %}
+    <div class="alert-banner">
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="alert-text">
+            <strong>{{ total_pendentes }} solicitação{{ total_pendentes|pluralize }}</strong> 
+            aguardando sua revisão e aprovação.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lista de Pendentes -->
+    {% if agendamentos %}
+        {% for agendamento in agendamentos %}
+        <div class="pendente-card">
+            <!-- Header Card -->
+            <div class="card-header-row">
+                <div>
+                    <div class="card-title">
+                        {{ agendamento.sala.nome }}
+                        <small>Solicitação #{{ agendamento.id }}</small>
+                    </div>
+                </div>
+                <span class="status-badge">
+                    <i class="fas fa-clock"></i> Pendente
+                </span>
+            </div>
+
+            <!-- Informações Grid -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Solicitante</div>
+                    <div class="info-value">
+                        {{ agendamento.usuario.get_full_name|default:agendamento.usuario.username }}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Data</div>
+                    <div class="info-value">
+                        {{ agendamento.data|date:"d/m/Y" }} 
+                        ({{ agendamento.data|date:"l"|title }})
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Horário</div>
+                    <div class="info-value">
+                        {{ agendamento.horario_inicio|time:"H:i" }} 
+                        — 
+                        {{ agendamento.horario_fim|time:"H:i" }}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Capacidade da Sala</div>
+                    <div class="info-value">
+                        {{ agendamento.sala.capacidade }} pessoas
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motivo -->
+            {% if agendamento.motivo %}
+            <div class="motivo-section">
+                <div class="motivo-label">
+                    <i class="fas fa-align-left"></i> Motivo da Solicitação
+                </div>
+                <div class="motivo-text">
+                    {{ agendamento.motivo }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ações -->
+            <div class="card-actions">
+                <a href="{% url 'agendamentos:approve' agendamento.id %}" class="btn btn-approve">
+                    <i class="fas fa-check-circle"></i> Revisar & Decidir
+                </a>
+                <a href="{% url 'agendamentos:detail' agendamento.id %}" class="btn btn-view">
+                    <i class="fas fa-eye"></i> Ver Detalhes
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Paginação -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">« Primeira</a>
+                <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+            {% endif %}
+
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Próxima ›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Última »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Estado Vazio -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-check-double"></i>
+            </div>
+            <p class="empty-text">
+                <strong>Nenhuma solicitação pendente</strong>
+            </p>
+            <p class="empty-text">
+                Todas as solicitações foram processadas. Bom trabalho!
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Você pode adicionar aqui javascript para ações rápidas
+    // Como confirmar/rejeitar direto da lista (opcional)
+</script>
+{% endblock %}

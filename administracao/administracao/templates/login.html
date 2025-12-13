@@ -289,6 +289,15 @@
             <div class="welcome-text">Bem-vindo!</div>
             <div class="subtitle-text">Faça login para acessar o sistema</div>
             
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #6ee7b7; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-check-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
             <form method="post" id="loginForm">
                 {% csrf_token %}
                 

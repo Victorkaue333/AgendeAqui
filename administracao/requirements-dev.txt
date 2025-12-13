@@ -1,0 +1,7 @@
+# Dependências Mínimas para Desenvolvimento Local
+Django==5.0.7
+python-decouple==3.8
+dj-database-url==2.3.0
+Pillow==10.1.0
+django-crispy-forms>=2.3
+crispy-bootstrap5==2024.10

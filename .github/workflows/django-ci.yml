@@ -1,0 +1,249 @@
+# ============================================================================
+# GitHub Actions CI/CD Pipeline
+# Automated testing, linting, and deployment
+# ============================================================================
+
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ main, desenv, staging ]
+  pull_request:
+    branches: [ main, desenv ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  POSTGRES_DB: agendeaqui_test
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+jobs:
+  # ==================== LINT & CODE QUALITY ====================
+  lint:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      working-directory: ./administracao
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort pylint
+        pip install -r requirements.txt
+    
+    - name: Run Black (code formatting check)
+      working-directory: ./administracao
+      run: black --check --diff .
+      continue-on-error: true
+    
+    - name: Run isort (import sorting check)
+      working-directory: ./administracao
+      run: isort --check-only --diff .
+      continue-on-error: true
+    
+    - name: Run Flake8 (linting)
+      working-directory: ./administracao
+      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      continue-on-error: true
+
+  # ==================== TESTS ====================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client libpq-dev
+    
+    - name: Install Python dependencies
+      working-directory: ./administracao
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create .env file
+      working-directory: ./administracao
+      run: |
+        echo "DEBUG=True" > .env
+        echo "SECRET_KEY=test-secret-key-for-ci" >> .env
+        echo "DATABASE_URL=postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}" >> .env
+        echo "REDIS_URL=redis://localhost:6379/0" >> .env
+        echo "CELERY_BROKER_URL=redis://localhost:6379/2" >> .env
+    
+    - name: Run migrations
+      working-directory: ./administracao
+      run: python manage.py migrate --noinput
+    
+    - name: Run tests with coverage
+      working-directory: ./administracao
+      run: |
+        pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./administracao/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Archive coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: ./administracao/htmlcov/
+        retention-days: 7
+
+  # ==================== SECURITY SCAN ====================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      working-directory: ./administracao
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit
+        pip install -r requirements.txt
+    
+    - name: Run Safety (dependency vulnerability check)
+      working-directory: ./administracao
+      run: safety check --json
+      continue-on-error: true
+    
+    - name: Run Bandit (security linter)
+      working-directory: ./administracao
+      run: bandit -r . -f json -o bandit-report.json
+      continue-on-error: true
+
+  # ==================== BUILD DOCKER IMAGE ====================
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKER_USERNAME }}/agendeaqui
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./administracao
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # ==================== DEPLOY (Production) ====================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          cd /var/www/agendeaqui
+          git pull origin main
+          docker-compose pull
+          docker-compose up -d --build
+          docker-compose exec -T web python manage.py migrate --noinput
+          docker-compose exec -T web python manage.py collectstatic --noinput
+          docker-compose restart web
+
+    - name: Notify deployment success
+      if: success()
+      run: echo "🚀 Deployment successful!"
+    
+    - name: Notify deployment failure
+      if: failure()
+      run: echo "❌ Deployment failed!"

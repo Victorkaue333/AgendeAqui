@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Redefinir Senha - AgendeAqui{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .redefinir-senha-container {
+        padding: 2rem;
+        background: #f5f7fa;
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        color: #0f172a;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .form-header p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    .user-info {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #b45309;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        border-left: 4px solid #16a34a;
+        color: #15803d;
+    }
+
+    .alert i {
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .confirmation-section {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .confirmation-section h3 {
+        margin: 0 0 1rem 0;
+        color: #b45309;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .confirmation-section p {
+        margin: 0;
+        color: #92400e;
+        line-height: 1.6;
+    }
+
+    .confirmation-section strong {
+        color: #b45309;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit {
+        background: #6366f1;
+        color: white;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        background: #4f46e5;
+    }
+
+    .btn-submit:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btn-cancel {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e1;
+    }
+
+    .password-display {
+        background: #f0f4ff;
+        border: 2px solid #6366f1;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .password-display p {
+        color: #64748b;
+        margin: 0 0 0.75rem 0;
+        font-size: 0.9rem;
+    }
+
+    .password-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-all;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .btn-copy {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .btn-copy:hover {
+        background: #4f46e5;
+    }
+
+    @media (max-width: 768px) {
+        .redefinir-senha-container {
+            padding: 1rem;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .password-box {
+            flex-direction: column;
+        }
+
+        .btn-copy {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="redefinir-senha-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-lock"></i>
+                Redefinir Senha
+            </h1>
+            <p>Gerar nova senha temporária para o usuário</p>
+        </div>
+
+        <!-- Informações do Usuário -->
+        <div class="user-info">
+            <div class="info-row">
+                <span class="info-label">👤 Usuário:</span>
+                <span class="info-value">{{ usuario.get_full_name|default:usuario.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📧 Email:</span>
+                <span class="info-value">{{ usuario.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tipo:</span>
+                <span class="info-value">
+                    {% if usuario.perfil.tipo == 'PRO' %}
+                        👨‍🏫 Professor
+                    {% elif usuario.perfil.tipo == 'COO' %}
+                        👩‍💼 Coordenador
+                    {% else %}
+                        🛠️ Admin
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}warning{% else %}success{% endif %}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                    <div>
+                        {{ message }}
+                        {% if 'Senha' in message %}
+                            {% autoescape off %}
+                            <div style="margin-top: 0.5rem; font-weight: 600;">
+                                {{ message|slice:"17:" }}
+                            </div>
+                            {% endautoescape %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Confirmação -->
+        <div class="confirmation-section">
+            <h3>
+                <i class="fas fa-exclamation-circle"></i>
+                Aviso Importante
+            </h3>
+            <p>
+                Ao confirmar, uma <strong>nova senha temporária</strong> será gerada. O usuário deverá usar essa senha para fazer login e alterá-la posteriormente.
+            </p>
+        </div>
+
+        <!-- Formulário -->
+        <form method="post" id="form-redefinir" onsubmit="return confirm('Tem certeza que deseja redefinir a senha deste usuário?');">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="confirm" name="confirm" required onchange="toggleSubmit()">
+                    <label for="confirm">Entendo que esta ação é irreversível e prosseguir com a redefinição de senha</label>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <a href="{% url 'usuarios:usuarios_list' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-submit" id="btn-submit" disabled>
+                    <i class="fas fa-sync"></i> Redefinir Senha
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleSubmit() {
+        const checkbox = document.getElementById('confirm');
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = !checkbox.checked;
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Senha copiada para a área de transferência!');
+        });
+    }
+</script>
+{% endblock %}

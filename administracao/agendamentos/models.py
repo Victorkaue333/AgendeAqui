@@ -2,6 +2,14 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from .validators import (
+    validate_booking_advance,
+    validate_weekday,
+    validate_business_hours,
+    validate_minimum_duration,
+    validate_maximum_duration,
+    validate_user_booking_limit,
+)
 
 
 class Agendamento(models.Model):
@@ -34,18 +42,43 @@ class Agendamento(models.Model):
 		ordering = ['-data', 'horario_inicio']
 		verbose_name = 'Agendamento'
 		verbose_name_plural = 'Agendamentos'
+		indexes = [
+			models.Index(fields=['data', 'status']),
+			models.Index(fields=['usuario', 'status']),
+			models.Index(fields=['sala', 'data', 'status']),
+		]
 
 	def __str__(self):
 		return f"#{self.pk} - {self.sala} em {self.data} ({self.horario_inicio}–{self.horario_fim})"
 
 	def clean(self):
-		# validações básicas
+		"""Validações completas do agendamento"""
 		super().clean()
 
-		if self.horario_inicio >= self.horario_fim:
-			raise ValidationError({'horario_inicio': 'Horário de início deve ser anterior ao horário de fim.'})
+		# Validação 1: Horário de início deve ser anterior ao fim
+		if self.horario_inicio and self.horario_fim:
+			if self.horario_inicio >= self.horario_fim:
+				raise ValidationError({
+					'horario_inicio': 'Horário de início deve ser anterior ao horário de fim.'
+				})
+			
+			# Validação 2: Duração mínima e máxima
+			validate_minimum_duration(self.horario_inicio, self.horario_fim)
+			validate_maximum_duration(self.horario_inicio, self.horario_fim)
+			
+			# Validação 3: Horário comercial
+			validate_business_hours(self.horario_inicio, self.horario_fim)
 
-		# Verifica conflitos com agendamentos APROVADOS existentes na mesma sala e data
+		# Validação 4: Data válida (antecedência e dia da semana)
+		if self.data:
+			validate_booking_advance(self.data)
+			validate_weekday(self.data)
+
+		# Validação 5: Limite de agendamentos por usuário
+		if self.usuario and self.data:
+			validate_user_booking_limit(self.usuario, self.data)
+
+		# Validação 6: Conflitos com agendamentos APROVADOS existentes
 		if self.sala and self.data and self.horario_inicio and self.horario_fim:
 			conflicts = Agendamento.objects.filter(
 				sala=self.sala,
@@ -59,10 +92,37 @@ class Agendamento(models.Model):
 			)
 
 			if conflicts.exists():
-				raise ValidationError('Conflito de horário: já existe um agendamento aprovado nesta sala nesse intervalo.')
+				conflict = conflicts.first()
+				raise ValidationError(
+					f'Conflito de horário: sala já reservada de '
+					f'{conflict.horario_inicio.strftime("%H:%M")} às '
+					f'{conflict.horario_fim.strftime("%H:%M")}.'
+				)
 
 	def save(self, *args, **kwargs):
-		# garante que a validação seja executada sempre que salvar
+		"""Garante validação antes de salvar"""
 		self.full_clean()
 		return super().save(*args, **kwargs)
+	
+	def pode_cancelar(self):
+		"""Verifica se o agendamento pode ser cancelado"""
+		from .validators import validate_cancellation_time
+		try:
+			validate_cancellation_time(self)
+			return True
+		except ValidationError:
+			return False
+	
+	def cancelar(self, motivo=''):
+		"""Cancela o agendamento"""
+		from .validators import validate_cancellation_time
+		validate_cancellation_time(self)
+		
+		self.status = 'R'
+		self.justificativa_reprovacao = f'Cancelado pelo usuário. {motivo}'
+		self.save()
+		
+		# Enviar notificação
+		from .tasks import send_booking_notification_async
+		send_booking_notification_async.delay(self.id, 'cancelled')
 
