@@ -321,7 +321,7 @@
                 <i class="fas fa-calendar-check"></i>
             </div>
             <div class="stat-label">Total de Agendamentos</div>
-            <div class="stat-value">{{ total_agendamentos }}</div>
+            <div class="stat-value">{{ meus_agendamentos_total }}</div>
         </div>
 
         <!-- Agendamentos Aprovados -->
@@ -330,7 +330,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-label">Agendamentos Aprovados</div>
-            <div class="stat-value">{{ agendamentos_aprovados }}</div>
+            <div class="stat-value">{{ meus_agendamentos_aprovados }}</div>
         </div>
 
         <!-- Agendamentos Pendentes -->
@@ -339,7 +339,7 @@
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-label">Aguardando Aprovação</div>
-            <div class="stat-value">{{ agendamentos_pendentes }}</div>
+            <div class="stat-value">{{ meus_agendamentos_pendentes }}</div>
         </div>
 
         <!-- Agendamentos Rejeitados -->
@@ -348,7 +348,7 @@
                 <i class="fas fa-times-circle"></i>
             </div>
             <div class="stat-label">Agendamentos Rejeitados</div>
-            <div class="stat-value">{{ agendamentos_rejeitados }}</div>
+            <div class="stat-value">{{ meus_agendamentos_reprovados }}</div>
         </div>
 
         <!-- Total de Salas -->
@@ -366,7 +366,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-label">Usuários Ativos</div>
-            <div class="stat-value">{{ usuarios_com_agendamentos }}</div>
+            <div class="stat-value">{{ total_usuarios }}</div>
         </div>
     </div>
 
@@ -561,7 +561,7 @@
             data: {
                 labels: ['Aprovados', 'Pendentes', 'Rejeitados'],
                 datasets: [{
-                    data: [{{ agendamentos_aprovados }}, {{ agendamentos_pendentes }}, {{ agendamentos_rejeitados }}],
+                    data: [{{ meus_agendamentos_aprovados }}, {{ meus_agendamentos_pendentes }}, {{ meus_agendamentos_reprovados }}],
                     backgroundColor: [
                         '#10b981',
                         '#f59e0b',

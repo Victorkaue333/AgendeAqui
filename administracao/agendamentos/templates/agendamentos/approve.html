@@ -285,6 +285,27 @@
 </style>
 
 <div class="container-wrapper">
+    <!-- Mensagens do Django -->
+    {% if messages %}
+        <div class="review-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="review-container">
         <div class="review-card">
             <!-- Header Banner -->
@@ -443,6 +464,8 @@
     // Mostrar/Esconder campo de justificativa conforme a seleção
     const radioButtons = document.querySelectorAll('input[name="acao"]');
     const justificativaGroup = document.getElementById('justificativa-group');
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('button[type="submit"]');
 
     function toggleJustificativa() {
         const selected = document.querySelector('input[name="acao"]:checked').value;
@@ -457,16 +480,87 @@
         radio.addEventListener('change', toggleJustificativa);
     });
 
-    // Validação ao submeter
-    document.querySelector('form').addEventListener('submit', function(e) {
+    // Validação e submissão via AJAX para aprovação INSTANTÂNEA
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
         const acao = document.querySelector('input[name="acao"]:checked').value;
         const justificativa = document.getElementById('id_justificativa_reprovacao').value.trim();
 
+        // Validar apenas se reprovar sem justificativa
         if (acao === 'R' && !justificativa) {
-            e.preventDefault();
-            alert('Você deve fornecer uma justificativa ao reprovar um agendamento.');
+            // Remover alertas anteriores
+            const oldAlerts = document.querySelectorAll('.alert-danger');
+            oldAlerts.forEach(alert => alert.remove());
+            
+            // Mostrar mensagem de erro
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Erro:</strong> Você deve fornecer uma justificativa ao reprovar um agendamento.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            form.parentNode.insertBefore(alertDiv, form);
+            justificativaGroup.classList.add('visible');
             document.getElementById('id_justificativa_reprovacao').focus();
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            return false;
+        }
+        
+        // Desabilitar botão imediatamente
+        submitBtn.disabled = true;
+        const acaoTexto = acao === 'A' ? 'Aprovando' : 'Reprovando';
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${acaoTexto}...`;
+        
+        // Preparar dados
+        const formData = new FormData();
+        formData.append('acao', acao);
+        formData.append('justificativa_reprovacao', justificativa);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        try {
+            // Requisição AJAX
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Sucesso! Redirecionar IMEDIATAMENTE para a lista e disparar modal de resultado
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                // /agendamentos/<id>/aprovar/
+                const agendamentoId = pathParts.length >= 3 ? pathParts[1] : '';
+                const acaoResultado = encodeURIComponent(data.status || '');
+                const idResultado = encodeURIComponent(agendamentoId);
+                window.location.href = `/agendamentos/?acao=${acaoResultado}&agendamento=${idResultado}`;
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            // Reabilitar botão em caso de erro
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Confirmar Decisão';
+            
+            // Mostrar erro
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Erro:</strong> ${error.message || 'Ocorreu um erro ao processar sua solicitação.'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            form.parentNode.insertBefore(alertDiv, form);
         }
     });
+
 </script>
 {% endblock %}

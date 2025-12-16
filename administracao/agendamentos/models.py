@@ -52,56 +52,15 @@ class Agendamento(models.Model):
 		return f"#{self.pk} - {self.sala} em {self.data} ({self.horario_inicio}–{self.horario_fim})"
 
 	def clean(self):
-		"""Validações completas do agendamento"""
-		super().clean()
-
-		# Validação 1: Horário de início deve ser anterior ao fim
+		"""Validações básicas do agendamento"""
+		# Validação simples: horário de início antes do fim
 		if self.horario_inicio and self.horario_fim:
 			if self.horario_inicio >= self.horario_fim:
-				raise ValidationError({
-					'horario_inicio': 'Horário de início deve ser anterior ao horário de fim.'
-				})
-			
-			# Validação 2: Duração mínima e máxima
-			validate_minimum_duration(self.horario_inicio, self.horario_fim)
-			validate_maximum_duration(self.horario_inicio, self.horario_fim)
-			
-			# Validação 3: Horário comercial
-			validate_business_hours(self.horario_inicio, self.horario_fim)
-
-		# Validação 4: Data válida (antecedência e dia da semana)
-		if self.data:
-			validate_booking_advance(self.data)
-			validate_weekday(self.data)
-
-		# Validação 5: Limite de agendamentos por usuário
-		if self.usuario and self.data:
-			validate_user_booking_limit(self.usuario, self.data)
-
-		# Validação 6: Conflitos com agendamentos APROVADOS existentes
-		if self.sala and self.data and self.horario_inicio and self.horario_fim:
-			conflicts = Agendamento.objects.filter(
-				sala=self.sala,
-				data=self.data,
-				status='A'  # apenas agendamentos aprovados bloqueiam
-			).exclude(pk=self.pk).filter(
-				~(
-					Q(horario_fim__lte=self.horario_inicio) |
-					Q(horario_inicio__gte=self.horario_fim)
-				)
-			)
-
-			if conflicts.exists():
-				conflict = conflicts.first()
-				raise ValidationError(
-					f'Conflito de horário: sala já reservada de '
-					f'{conflict.horario_inicio.strftime("%H:%M")} às '
-					f'{conflict.horario_fim.strftime("%H:%M")}.'
-				)
+				raise ValidationError('Horário de início deve ser anterior ao horário de fim.')
 
 	def save(self, *args, **kwargs):
-		"""Garante validação antes de salvar"""
-		self.full_clean()
+		"""Salva o agendamento"""
+		# Validação já é feita pelo formulário
 		return super().save(*args, **kwargs)
 	
 	def pode_cancelar(self):

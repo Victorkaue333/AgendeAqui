@@ -680,48 +680,67 @@
             </div>
 
             <ul class="nav-menu">
+                <!-- Acesso Rápido - Todos os perfis -->
                 <li class="nav-item">
                     <a href="{% url 'acesso_rapido' %}" class="nav-link-custom {% if request.path == '/' or 'acesso_rapido' in request.path %}active{% endif %}">
-                        <i class="fas fa-accessible-icon"></i>
+                        <i class="fas fa-home"></i>
                         <span>Acesso Rápido</span>
                     </a>
                 </li>
+                
+                <!-- Dashboard - Todos os perfis (dados diferenciados) -->
                 <li class="nav-item">
                     <a href="{% url 'dashboard:home' %}" class="nav-link-custom {% if 'dashboard' in request.path %}active{% endif %}">
                         <i class="fas fa-chart-line"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
+                
+                <!-- Agendamentos - Todos os perfis -->
                 <li class="nav-item">
                     <a href="{% url 'agendamentos:agendamentos' %}" class="nav-link-custom {% if 'agendamentos' in request.path %}active{% endif %}">
                         <i class="fas fa-calendar-check"></i>
                         <span>Agendamentos</span>
                     </a>
                 </li>
+                
+                <!-- Salas - Todos podem visualizar -->
                 <li class="nav-item">
                     <a href="{% url 'salas:list' %}" class="nav-link-custom {% if 'salas' in request.path %}active{% endif %}">
                         <i class="fas fa-door-open"></i>
                         <span>Salas e Labs</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{% url 'relatorios:index' %}" class="nav-link-custom {% if 'relatorios' in request.path %}active{% endif %}">
-                        <i class="fas fa-chart-pie"></i>
-                        <span>Relatórios</span>
-                    </a>
-                </li>
-                {% if request.user.perfil.tipo == 'ADM' %}
-                <li class="nav-item">
-                    <a href="{% url 'usuarios:usuarios_list' %}" class="nav-link-custom {% if 'usuarios' in request.path and 'perfil' not in request.path %}active{% endif %}">
-                        <i class="fas fa-users"></i>
-                        <span>Usuários</span>
-                    </a>
-                </li>
+                
+                <!-- Relatórios - Apenas Coordenador e Admin -->
+                {% if request.user.is_authenticated and request.user.perfil %}
+                    {% if request.user.perfil.tipo == 'COO' or request.user.perfil.tipo == 'ADM' %}
+                    <li class="nav-item">
+                        <a href="{% url 'relatorios:index' %}" class="nav-link-custom {% if 'relatorios' in request.path %}active{% endif %}">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    {% endif %}
                 {% endif %}
+                
+                <!-- Usuários - Apenas Admin -->
+                {% if request.user.is_authenticated and request.user.perfil %}
+                    {% if request.user.perfil.tipo == 'ADM' %}
+                    <li class="nav-item">
+                        <a href="{% url 'usuarios:usuarios_list' %}" class="nav-link-custom {% if 'usuarios' in request.path and 'perfil' not in request.path %}active{% endif %}">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Gerenciar Usuários</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Perfil - Todos os perfis -->
                 <li class="nav-item">
                     <a href="{% url 'usuarios:perfil' %}" class="nav-link-custom {% if 'perfil' in request.path %}active{% endif %}">
                         <i class="fas fa-user-circle"></i>
-                        <span>Perfil</span>
+                        <span>Meu Perfil</span>
                     </a>
                 </li>
             </ul>

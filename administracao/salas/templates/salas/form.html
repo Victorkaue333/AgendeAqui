@@ -2,46 +2,279 @@
 {% block title %}Cadastro de Sala - AgendeAqui{% endblock %}
 
 {% block content %}
+<style>
+    /* Animações */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    /* Header do Card */
+    .card-header.gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none;
+    }
+    
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Campos do Formulário */
+    .form-label {
+        color: #374151;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-text {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .input-group .form-control,
+    .input-group .form-select {
+        border-left: none;
+        border-radius: 0 0.75rem 0.75rem 0;
+    }
+    
+    .input-group-text {
+        border-radius: 0.75rem 0 0 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        background: #fff;
+    }
+    
+    textarea.form-control {
+        border-radius: 0.75rem;
+        padding-left: 3rem;
+        resize: none;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        z-index: 10;
+    }
+    
+    /* Botões */
+    .btn {
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #66428b 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-light {
+        background: #f8fafc;
+        color: #64748b;
+    }
+    
+    .btn-light:hover {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    
+    /* Mensagens de Erro */
+    .invalid-feedback {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .alert {
+        border-radius: 0.75rem;
+        border: none;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    /* Texto de Ajuda */
+    .form-text {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+        
+        .header-icon {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem !important;
+        }
+    }
+</style>
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-primary text-white rounded-top-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-door-open fa-lg"></i>
-                    <h4 class="mb-0">Cadastrar Nova Sala</h4>
+            <div class="card shadow-lg border-0 rounded-4 animate-fade-in">
+                <div class="card-header gradient-header text-white rounded-top-4 d-flex align-items-center gap-3 py-4">
+                    <div class="header-icon">
+                        <i class="fas fa-door-open fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Cadastrar Nova Sala</h4>
+                        <small class="opacity-75">Preencha os dados abaixo</small>
+                    </div>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-5">
                     <form method="post" autocomplete="off">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_nome" class="form-label">Nome da Sala</label>
-                            <input type="text" name="nome" class="form-control" id="id_nome" placeholder="Ex: Lab 101" value="{{ form.nome.value|default:'' }}" required>
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Erro ao salvar:</strong>
+                            <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            </ul>
                         </div>
-                        <div class="mb-3">
-                            <label for="id_capacidade" class="form-label">Capacidade</label>
-                            <input type="number" name="capacidade" class="form-control" id="id_capacidade" min="1" placeholder="Ex: 40" value="{{ form.capacidade.value|default:'' }}" required>
+                        {% endif %}
+                        
+                        <!-- Campo Nome -->
+                        <div class="mb-4">
+                            <label for="id_nome" class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-tag text-primary"></i>
+                                Nome da Sala *
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-door-closed text-muted"></i>
+                                </span>
+                                {{ form.nome }}
+                            </div>
+                            {% if form.nome.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ form.nome.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="mb-3">
-                            <label for="id_bloco" class="form-label">Bloco</label>
-                            <select name="bloco" class="form-select" id="id_bloco" required>
-                                <option value="" disabled {% if not form.bloco.value %}selected{% endif %}>Selecione o bloco</option>
-                                <option value="A" {% if form.bloco.value == 'A' %}selected{% endif %}>Bloco A</option>
-                                <option value="B" {% if form.bloco.value == 'B' %}selected{% endif %}>Bloco B</option>
-                                <option value="C" {% if form.bloco.value == 'C' %}selected{% endif %}>Bloco C</option>
-                                <option value="D" {% if form.bloco.value == 'D' %}selected{% endif %}>Bloco D</option>
-                                <option value="E" {% if form.bloco.value == 'E' %}selected{% endif %}>Bloco E</option>
-                                <option value="F" {% if form.bloco.value == 'F' %}selected{% endif %}>Bloco F</option>
-                                <option value="G" {% if form.bloco.value == 'G' %}selected{% endif %}>Bloco G</option>
-                                <option value="H" {% if form.bloco.value == 'H' %}selected{% endif %}>Bloco H</option>
-                            </select>
+                        
+                        <!-- Campo Capacidade -->
+                        <div class="mb-4">
+                            <label for="id_capacidade" class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-users text-success"></i>
+                                Capacidade *
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-chair text-muted"></i>
+                                </span>
+                                {{ form.capacidade }}
+                                <span class="input-group-text bg-light border-start-0">
+                                    <small class="text-muted">pessoas</small>
+                                </span>
+                            </div>
+                            {% if form.capacidade.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ form.capacidade.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="mb-3">
-                            <label for="id_recursos" class="form-label">Recursos</label>
-                            <textarea name="recursos" class="form-control" id="id_recursos" rows="2" placeholder="Ex: Projetor, Ar-condicionado, Computadores">{{ form.recursos.value|default:'' }}</textarea>
+                        
+                        <!-- Campo Bloco -->
+                        <div class="mb-4">
+                            <label for="id_bloco_nome" class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-building text-info"></i>
+                                Localização (Bloco) *
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-map-marker-alt text-muted"></i>
+                                </span>
+                                {{ form.bloco_nome }}
+                            </div>
+                            {% if form.bloco_nome.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ form.bloco_nome.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{% url 'salas:list' %}" class="btn btn-outline-secondary">Cancelar</a>
-                            <button type="submit" class="btn btn-primary px-4">Salvar</button>
+                        
+                        <!-- Campo Recursos -->
+                        <div class="mb-4">
+                            <label for="id_recursos_text" class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-tools text-warning"></i>
+                                Recursos Disponíveis
+                            </label>
+                            <div class="position-relative">
+                                <span class="input-icon">
+                                    <i class="fas fa-list text-muted"></i>
+                                </span>
+                                {{ form.recursos_text }}
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ form.recursos_text.help_text }}
+                            </div>
+                            {% if form.recursos_text.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ form.recursos_text.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botões -->
+                        <div class="d-flex justify-content-between gap-3 mt-5">
+                            <a href="{% url 'salas:list' %}" class="btn btn-light btn-lg px-4 border">
+                                <i class="fas fa-times me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                                <i class="fas fa-check me-2"></i>
+                                Salvar Sala
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -49,21 +282,4 @@
         </div>
     </div>
 </div>
-<style>
-    .card-header.bg-primary {
-        background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%) !important;
-    }
-    .form-label { font-weight: 500; }
-    .form-control, .form-select, textarea {
-        border-radius: 0.5rem;
-        font-size: 1rem;
-    }
-    .btn-primary {
-        background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%);
-        border: none;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(90deg, #1d4ed8 60%, #4f46e5 100%);
-    }
-</style>
 {% endblock %}

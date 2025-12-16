@@ -200,11 +200,22 @@ def criar_usuario(request):
                 }
             )
             
-            messages.success(
-                request, 
-                f'Usuário {user.get_full_name()} criado com sucesso! '
-                f'Senha temporária: {senha_temporaria}'
-            )
+            # Enviar email com senha temporária
+            try:
+                from .tasks import send_welcome_email_with_password
+                send_welcome_email_with_password.delay(user.id, senha_temporaria)
+                messages.success(
+                    request, 
+                    f'Usuário {user.get_full_name()} criado com sucesso! '
+                    f'Um email com a senha temporária foi enviado para {user.email}.'
+                )
+            except Exception as e:
+                messages.warning(
+                    request,
+                    f'Usuário criado, mas houve erro ao enviar email. '
+                    f'Senha temporária: {senha_temporaria}'
+                )
+            
             return redirect('usuarios:usuarios_list')
     else:
         form = CriarUsuarioForm()
@@ -222,7 +233,7 @@ def editar_perfil_usuario(request, pk):
     
     if request.method == 'POST':
         novo_tipo = request.POST.get('tipo')
-        if novo_tipo in dict(Perfil.TIPO_CHOICES):
+        if novo_tipo in dict(Perfil.PERFIL_CHOICES):
             perfil = usuario.perfil
             tipo_anterior = perfil.tipo
             perfil.tipo = novo_tipo
@@ -244,7 +255,9 @@ def editar_perfil_usuario(request, pk):
                 request, 
                 f'Perfil de {usuario.get_full_name()} alterado para {novo_tipo}'
             )
-            return redirect('usuarios:usuarios_list')
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+            return HttpResponseRedirect(reverse('usuarios:usuarios_list'))
     
     return render(request, 'usuarios/editar_perfil.html', {
         'usuario': usuario,
@@ -257,7 +270,7 @@ def editar_perfil_usuario(request, pk):
 def redefinir_senha_usuario(request, pk):
     """
     Redefine a senha de um usuário.
-    Gera uma senha temporária (futuramente enviará por email).
+    Gera uma senha temporária e envia por email.
     """
     usuario = get_object_or_404(User, pk=pk)
     
@@ -274,10 +287,21 @@ def redefinir_senha_usuario(request, pk):
             dados={'usuario': usuario.get_full_name()}
         )
         
-        messages.success(
-            request, 
-            f'Senha redefinida! Senha temporária: {nova_senha}'
-        )
+        # Enviar email com nova senha
+        try:
+            from .tasks import send_password_reset_email
+            send_password_reset_email.delay(usuario.id, nova_senha)
+            messages.success(
+                request, 
+                f'Senha redefinida! Um email com a nova senha foi enviado para {usuario.email}.'
+            )
+        except Exception as e:
+            messages.warning(
+                request,
+                f'Senha redefinida, mas houve erro ao enviar email. '
+                f'Nova senha temporária: {nova_senha}'
+            )
+        
         return redirect('usuarios:usuarios_list')
     
     return render(request, 'usuarios/redefinir_senha.html', {'usuario': usuario})

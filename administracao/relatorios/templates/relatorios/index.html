@@ -217,32 +217,45 @@
             <i class="fas fa-filter me-2"></i>Filtros
         </h5>
         <form method="get" class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-3">
                 <div class="filter-group">
-                    <label for="bloco">Bloco:</label>
-                    <select name="bloco" id="bloco">
-                        <option value="">Todos</option>
-                        {% for b in blocos %}
-                            <option value="{{ b.id }}" {% if request.GET.bloco == b.id|stringformat:"s" %}selected{% endif %}>
-                                {{ b.nome }}
+                    <label for="data_inicio">Data Início:</label>
+                    <input type="date" name="data_inicio" id="data_inicio" value="{{ data_inicio_filter }}">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="filter-group">
+                    <label for="data_fim">Data Fim:</label>
+                    <input type="date" name="data_fim" id="data_fim" value="{{ data_fim_filter }}">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <div class="filter-group">
+                    <label for="sala">Sala:</label>
+                    <select name="sala" id="sala">
+                        <option value="">Todas as Salas</option>
+                        {% for sala in todas_salas %}
+                            <option value="{{ sala.id }}" {% if sala_id_filter == sala.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sala.nome }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-2">
                 <div class="filter-group">
-                    <label for="start">Data Início:</label>
-                    <input type="date" name="start" id="start" value="{{ request.GET.start }}">
+                    <label for="status">Status:</label>
+                    <select name="status" id="status">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="filter-group">
-                    <label for="end">Data Fim:</label>
-                    <input type="date" name="end" id="end" value="{{ request.GET.end }}">
-                </div>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-12 col-lg-2">
                 <div class="filter-group">
                     <label>&nbsp;</label>
                     <button type="submit" class="btn-export w-100">
@@ -252,137 +265,184 @@
             </div>
         </form>
 
-        <div class="d-flex gap-2 mt-3">
+        <div class="d-flex gap-2 mt-3 flex-wrap">
             <a href="{% url 'relatorios:export_csv' %}?{% if request.GET %}{{ request.GET.urlencode }}{% endif %}" class="btn-export btn-export-alt">
-                <i class="fas fa-download me-1"></i>Exportar CSV
+                <i class="fas fa-file-csv me-1"></i>Exportar CSV
             </a>
-            <button class="btn-export btn-export-alt" onclick="window.print();">
-                <i class="fas fa-print me-1"></i>Imprimir
-            </button>
+            <a href="{% url 'relatorios:export_pdf' %}?{% if request.GET %}{{ request.GET.urlencode }}{% endif %}" class="btn-export btn-export-alt">
+                <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+            </a>
+            {% if perfil.tipo == 'ADM' %}
+            <a href="{% url 'relatorios:export_salas_csv' %}" class="btn-export btn-export-alt">
+                <i class="fas fa-door-open me-1"></i>Relatório de Salas (CSV)
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total de Agendamentos</h6>
+                        <h2 class="fw-bold mb-0">{{ total_agendamentos }}</h2>
+                    </div>
+                    <div class="text-primary">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Aprovados</h6>
+                        <h2 class="fw-bold mb-0 text-success">{{ total_aprovados }}</h2>
+                    </div>
+                    <div class="text-success">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Pendentes</h6>
+                        <h2 class="fw-bold mb-0 text-warning">{{ total_pendentes }}</h2>
+                    </div>
+                    <div class="text-warning">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Taxa de Aprovação</h6>
+                        <h2 class="fw-bold mb-0 text-info">{{ taxa_aprovacao }}%</h2>
+                    </div>
+                    <div class="text-info">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Gráficos -->
-    <div class="chart-card">
-        <div class="chart-title">
-            <i class="fas fa-chart-pie me-2"></i>Salas por Bloco
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie me-2"></i>Agendamentos por Status
+                </div>
+                <canvas id="chartStatus" height="200"></canvas>
+            </div>
         </div>
-        <canvas id="chartSalas" height="100"></canvas>
+        <div class="col-lg-6 mb-3">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar me-2"></i>Top 5 Salas Mais Utilizadas
+                </div>
+                <canvas id="chartSalas" height="200"></canvas>
+            </div>
+        </div>
     </div>
 
     <!-- Tabela de Agendamentos -->
-    {% if agendamentos is not None %}
-        <div class="chart-card">
-            <div class="chart-title">
-                <i class="fas fa-list me-2"></i>Agendamentos ({{ ag_count }})
-            </div>
-            
-            {% if agendamentos %}
-                <div class="table-responsive-custom">
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Sala</th>
-                                <th>Usuário</th>
-                                <th>Motivo</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for a in agendamentos %}
-                            <tr>
-                                <td>#{{ a.id }}</td>
-                                <td>{{ a.data|date:"d/m/Y" }}</td>
-                                <td>{{ a.horario_inicio|time:"H:i" }} - {{ a.horario_fim|time:"H:i" }}</td>
-                                <td>{{ a.sala.nome }}</td>
-                                <td>{{ a.usuario.get_full_name|default:a.usuario.username }}</td>
-                                <td>{{ a.motivo|truncatewords:5 }}</td>
-                                <td>
-                                    <span class="status-badge status-{% if a.status == 'Aprovado' %}aprovado{% elif a.status == 'Pendente' %}pendente{% else %}rejeitado{% endif %}">
-                                        {{ a.get_status_display }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <p class="empty-state-text">Nenhum agendamento encontrado com esses filtros.</p>
-                </div>
-            {% endif %}
+    <div class="chart-card">
+        <div class="chart-title">
+            <i class="fas fa-list me-2"></i>Últimos Agendamentos ({{ total_agendamentos }} total)
         </div>
-    {% else %}
-        <!-- Tabela de Salas -->
-        <div class="chart-card">
-            <div class="chart-title">
-                <i class="fas fa-door-open me-2"></i>Salas Cadastradas
+        
+        {% if agendamentos_recentes %}
+            <div class="table-responsive-custom">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Sala</th>
+                            <th>Usuário</th>
+                            <th>Motivo</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ag in agendamentos_recentes %}
+                        <tr>
+                            <td>#{{ ag.id }}</td>
+                            <td>{{ ag.data|date:"d/m/Y" }}</td>
+                            <td>{{ ag.horario_inicio|time:"H:i" }} - {{ ag.horario_fim|time:"H:i" }}</td>
+                            <td>{{ ag.sala.nome }}</td>
+                            <td>{{ ag.usuario.get_full_name|default:ag.usuario.username }}</td>
+                            <td>{{ ag.motivo|truncatewords:5 }}</td>
+                            <td>
+                                <span class="status-badge status-{% if ag.status == 'A' %}aprovado{% elif ag.status == 'P' %}pendente{% else %}rejeitado{% endif %}">
+                                    {{ ag.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            
-            {% if salas %}
-                <div class="table-responsive-custom">
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Bloco</th>
-                                <th>Capacidade</th>
-                                <th>Recursos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for s in salas %}
-                            <tr>
-                                <td>#{{ s.id }}</td>
-                                <td>{{ s.nome }}</td>
-                                <td>{{ s.bloco.nome }}</td>
-                                <td>{{ s.capacidade }} pessoas</td>
-                                <td>
-                                    {% if s.recursos.all %}
-                                        {% for r in s.recursos.all %}
-                                            <span class="badge bg-light text-dark">{{ r.nome }}</span>
-                                        {% endfor %}
-                                    {% else %}
-                                        <span class="text-muted">Nenhum</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-search"></i>
                 </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <p class="empty-state-text">Nenhuma sala cadastrada.</p>
-                </div>
-            {% endif %}
-        </div>
-    {% endif %}
+                <p class="empty-state-text">Nenhum agendamento encontrado com esses filtros.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Gráfico de Salas por Bloco
+    // Gráfico de Agendamentos por Status
+    const chartStatusCtx = document.getElementById('chartStatus');
+    if (chartStatusCtx) {
+        new Chart(chartStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ agendamentos_por_status.labels|safe }},
+                datasets: [{
+                    label: 'Agendamentos',
+                    data: {{ agendamentos_por_status.values|safe }},
+                    backgroundColor: {{ agendamentos_por_status.colors|safe }},
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico de Salas Mais Utilizadas
     const chartSalasCtx = document.getElementById('chartSalas');
     if (chartSalasCtx) {
         new Chart(chartSalasCtx, {
             type: 'bar',
             data: {
-                labels: ['Bloco A', 'Bloco B', 'Bloco C', 'Auditório'],
+                labels: {{ salas_chart.labels|safe }},
                 datasets: [{
-                    label: 'Quantidade de Salas',
-                    data: [5, 7, 3, 2],
+                    label: 'Agendamentos Aprovados',
+                    data: {{ salas_chart.values|safe }},
                     backgroundColor: '#6366f1',
                     borderRadius: 6,
                     borderSkipped: false

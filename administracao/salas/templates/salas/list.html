@@ -254,8 +254,8 @@
     </div>
 
     <!-- Lista de Salas -->
-    {% if object_list %}
-        {% for sala in object_list %}
+    {% if salas %}
+        {% for sala in salas %}
         <div class="sala-card">
             <div class="sala-header">
                 <div>
@@ -466,7 +466,20 @@
     // Confirmar Exclusão
     function confirmarExclusao() {
         const salaId = document.getElementById('salaIdExcluir').value;
-        window.location.href = `/salas/${salaId}/excluir/`;
+        // Criar formulário POST para exclusão
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/salas/${salaId}/delete/`;
+        
+        // Adicionar CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // Submeter formulário de edição via AJAX
@@ -476,7 +489,7 @@
         const salaId = document.getElementById('salaIdEditar').value;
         const formData = new FormData(this);
         
-        fetch(`/salas/${salaId}/editar/`, {
+        fetch(`/salas/${salaId}/edit/`, {
             method: 'POST',
             body: formData,
             headers: {

@@ -83,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'administracao.middleware.PerfilAccessMiddleware',  # Controle de acesso por perfil
 ]
 
 # Add Debug Toolbar in development

@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from .models import Agendamento
 
 
@@ -57,6 +58,7 @@ class AgendamentoCreateForm(forms.ModelForm):
         horario_inicio = cleaned_data.get('horario_inicio')
         horario_fim = cleaned_data.get('horario_fim')
 
+        # Validação simples de horário
         if horario_inicio and horario_fim:
             if horario_inicio >= horario_fim:
                 raise forms.ValidationError(

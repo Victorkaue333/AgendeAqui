@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-from .view import acesso_rapido, landingpage, login_view, cadastro
+from .view import acesso_rapido, landingpage, login_view, cadastro, logout_view
 from usuarios.forms import CustomAuthenticationForm
 
 urlpatterns = [
@@ -20,7 +20,7 @@ urlpatterns = [
         authentication_form=CustomAuthenticationForm, 
         next_page='acesso_rapido'
     ), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', logout_view, name='logout'),
     path('cadastro/', cadastro, name='cadastro'),
     
     # Recuperação de senha

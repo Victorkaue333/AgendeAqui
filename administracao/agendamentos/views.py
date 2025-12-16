@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, DetailView, UpdateView
@@ -7,11 +9,26 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.http import JsonResponse
 from datetime import datetime
+import threading
 
 from .models import Agendamento
 from .forms import AgendamentoCreateForm, AgendamentoApprovalForm
 from salas.models import Sala
 from administracao.models import Perfil
+
+
+def _enqueue_booking_notification(agendamento_id, event):
+    """Dispara a notificação em background para não atrasar a resposta HTTP."""
+
+    def _run():
+        try:
+            from .tasks import send_booking_notification_async
+            send_booking_notification_async.delay(agendamento_id, event)
+        except Exception:
+            # Se o broker do Celery estiver fora, não bloquear a UX
+            pass
+
+    threading.Thread(target=_run, daemon=True).start()
 
 
 # ============================================================================
@@ -25,10 +42,10 @@ def coordenador_required(func):
             perfil = request.user.perfil
             if perfil.tipo not in ['COO', 'ADM']:
                 messages.error(request, 'Você não tem permissão para acessar esta página.')
-                return redirect('acesso_rapido')
+                return HttpResponseRedirect(reverse('acesso_rapido'))
         except Perfil.DoesNotExist:
             messages.error(request, 'Perfil não encontrado.')
-            return redirect('acesso_rapido')
+            return HttpResponseRedirect(reverse('acesso_rapido'))
         
         return func(request, *args, **kwargs)
     return wrapper
@@ -45,7 +62,7 @@ class CoordenadorRequiredMixin(UserPassesTestMixin, LoginRequiredMixin):
     
     def handle_no_permission(self):
         messages.error(self.request, 'Você não tem permissão para acessar esta página.')
-        return redirect('acesso_rapido')
+        return HttpResponseRedirect(reverse('acesso_rapido'))
 
 
 # ============================================================================
@@ -64,7 +81,7 @@ def calendario(request):
         perfil = request.user.perfil
     except Perfil.DoesNotExist:
         messages.error(request, 'Perfil não configurado.')
-        return redirect('usuarios:perfil')
+        return HttpResponseRedirect(reverse('usuarios:perfil'))
 
     salas = Sala.objects.all()
     
@@ -94,7 +111,7 @@ def agendamentos(request):
         perfil = request.user.perfil
     except Perfil.DoesNotExist:
         messages.error(request, 'Perfil não configurado.')
-        return redirect('usuarios:perfil')
+        return HttpResponseRedirect(reverse('usuarios:perfil'))
 
     salas = Sala.objects.all()
     
@@ -109,9 +126,9 @@ def agendamentos(request):
         # Admin/Coordenador: VÊ TODOS OS AGENDAMENTOS
         agendamentos_list = Agendamento.objects.all().select_related('sala', 'usuario')
     else:
-        # Professor: VÊ SÓ OS APROVADOS (para consultar disponibilidade)
+        # Professor: VÊ SEUS PRÓPRIOS agendamentos (todos status) + APROVADOS dos outros
         agendamentos_list = Agendamento.objects.filter(
-            status='A'
+            Q(usuario=request.user) | Q(status='A')
         ).select_related('sala', 'usuario')
     
     # Aplicar filtros
@@ -172,12 +189,22 @@ class AgendamentoCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """Associar o usuário logado ao agendamento."""
-        form.instance.usuario = self.request.user
-        messages.success(
-            self.request,
-            f'Agendamento solicitado com sucesso! Status: Pendente de aprovação.'
-        )
-        return super().form_valid(form)
+        try:
+            agendamento = form.save(commit=False)
+            agendamento.usuario = self.request.user
+            agendamento.status = 'P'  # Pendente
+            agendamento.save()
+            
+            # Adicionar flag de sucesso na sessão para mostrar modal
+            self.request.session['agendamento_criado'] = True
+            self.request.session['agendamento_id'] = agendamento.id
+            
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+            return HttpResponseRedirect(reverse('agendamentos:agendamentos'))
+        except Exception as e:
+            messages.error(self.request, f'Erro ao criar agendamento: {str(e)}')
+            return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -233,46 +260,105 @@ class AgendamentoPendentesListView(CoordenadorRequiredMixin, ListView):
         return context
 
 
-class AgendamentoApproveView(CoordenadorRequiredMixin, UpdateView):
+class AgendamentoApproveView(CoordenadorRequiredMixin, DetailView):
     """
-    Aprovar um agendamento pendente.
+    Aprovar ou reprovar um agendamento pendente.
     """
     model = Agendamento
-    form_class = AgendamentoApprovalForm
     template_name = 'agendamentos/approve.html'
-    success_url = reverse_lazy('agendamentos:pendentes')
+    context_object_name = 'agendamento'
 
     def get_queryset(self):
         """Apenas agendamentos pendentes podem ser aprovados."""
         return Agendamento.objects.filter(status='P')
+    
+    def get(self, request, *args, **kwargs):
+        """Verificar se o agendamento existe e está pendente."""
+        try:
+            self.object = self.get_object()
+            return super().get(request, *args, **kwargs)
+        except:
+            messages.error(request, '❌ Este agendamento não está mais pendente ou não existe.')
+            return HttpResponseRedirect(reverse('agendamentos:agendamentos'))
 
-    def form_valid(self, form):
-        agendamento = form.instance
+    def post(self, request, *args, **kwargs):
+        """Processar aprovação ou reprovação."""
+        try:
+            agendamento = self.get_object()
+        except:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Este agendamento não está mais pendente ou não existe.'
+                })
+            messages.error(request, '❌ Este agendamento não está mais pendente ou não existe.')
+            return HttpResponseRedirect(reverse('agendamentos:agendamentos'))
         
         # Determinar ação
-        acao = self.request.POST.get('acao')
+        acao = request.POST.get('acao')
         
         if acao == 'A':
+            # Aprovar
             agendamento.status = 'A'
             agendamento.justificativa_reprovacao = ''
-            messages.success(
-                self.request,
-                f'Agendamento #{agendamento.id} aprovado com sucesso!'
-            )
+            agendamento.save()
+            
+            # Enfileirar notificação em background (não bloquear)
+            _enqueue_booking_notification(agendamento.id, 'approved')
+            
+            # Retornar JSON imediatamente se for AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Agendamento #{agendamento.id} aprovado!',
+                    'status': 'aprovado'
+                })
+            
+            messages.success(request, f'✅ Agendamento #{agendamento.id} aprovado com sucesso!')
+            
         elif acao == 'R':
+            # Reprovar
+            justificativa = request.POST.get('justificativa_reprovacao', '').strip()
+            
+            if not justificativa:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'A justificativa é obrigatória para reprovar.'
+                    })
+                messages.error(request, '❌ A justificativa é obrigatória para reprovar um agendamento.')
+                return HttpResponseRedirect(request.path)
+            
             agendamento.status = 'R'
-            agendamento.justificativa_reprovacao = form.cleaned_data.get('justificativa_reprovacao', '')
-            messages.success(
-                self.request,
-                f'Agendamento #{agendamento.id} reprovado. Justificativa registrada.'
-            )
+            agendamento.justificativa_reprovacao = justificativa
+            agendamento.save()
+            
+            # Enfileirar notificação em background (não bloquear)
+            _enqueue_booking_notification(agendamento.id, 'rejected')
+            
+            # Retornar JSON imediatamente se for AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Agendamento #{agendamento.id} reprovado.',
+                    'status': 'reprovado'
+                })
+            
+            messages.success(request, f'❌ Agendamento #{agendamento.id} reprovado.')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': '❌ Ação inválida. Selecione Aprovar ou Reprovar.'
+                })
+            messages.error(request, '❌ Ação inválida. Selecione Aprovar ou Reprovar.')
+            return HttpResponseRedirect(request.path)
         
-        return super().form_valid(form)
+        return HttpResponseRedirect(reverse('agendamentos:agendamentos'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agendamento = self.object
-        context['agendamento'] = agendamento
         context['usuario_nome'] = agendamento.usuario.get_full_name() or agendamento.usuario.username
         context['sala_nome'] = agendamento.sala.nome
         return context
@@ -335,6 +421,49 @@ def meus_agendamentos(request):
         'total': agendamentos.count(),
     }
     return render(request, 'agendamentos/meus_agendamentos.html', context)
+
+
+@login_required
+def cancelar_agendamento(request, pk):
+    """
+    Cancela um agendamento.
+    Apenas o usuário criador pode cancelar.
+    """
+    agendamento = get_object_or_404(Agendamento, pk=pk)
+    
+    # Verificar permissão
+    if agendamento.usuario != request.user:
+        messages.error(request, 'Você não tem permissão para cancelar este agendamento.')
+        return HttpResponseRedirect(reverse('agendamentos:meus_agendamentos'))
+    
+    # Verificar se já foi reprovado
+    if agendamento.status == 'R':
+        messages.error(request, 'Este agendamento já foi reprovado/cancelado.')
+        return HttpResponseRedirect(reverse('agendamentos:meus_agendamentos'))
+    
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo', '').strip()
+        
+        # Verificar se pode cancelar
+        if not agendamento.pode_cancelar():
+            messages.error(
+                request, 
+                'Não é possível cancelar este agendamento. O cancelamento deve ser feito com pelo menos 24 horas de antecedência.'
+            )
+            return HttpResponseRedirect(reverse('agendamentos:meus_agendamentos'))
+        
+        try:
+            agendamento.cancelar(motivo)
+            messages.success(request, 'Agendamento cancelado com sucesso!')
+            return HttpResponseRedirect(reverse('agendamentos:meus_agendamentos'))
+        except Exception as e:
+            messages.error(request, f'Erro ao cancelar agendamento: {str(e)}')
+            return HttpResponseRedirect(reverse('agendamentos:meus_agendamentos'))
+    
+    context = {
+        'agendamento': agendamento,
+    }
+    return render(request, 'agendamentos/cancelar.html', context)
 
 
 # ============================================================================

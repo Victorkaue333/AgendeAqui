@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.contrib import messages
 from django import forms
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from .models import Perfil
 
 
@@ -79,21 +82,47 @@ def cadastro(request):
 		form = CadastroForm(request.POST)
 		if form.is_valid():
 			try:
-				# Criar o usuário
+				# Criar o usuário (o perfil será criado automaticamente pelo signal)
 				user = User.objects.create_user(
 					username=form.cleaned_data['username'],
 					email=form.cleaned_data['email'],
 					password=form.cleaned_data['password1']
 				)
 				
-				# Criar o perfil associado com tipo Professor por padrão
-				Perfil.objects.create(usuario=user, tipo='PRO')
+				# Se for requisição AJAX, retorna JSON
+				if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+					return JsonResponse({
+						'success': True,
+						'message': 'Cadastro realizado com sucesso!',
+						'username': form.cleaned_data['username'],
+						'email': form.cleaned_data['email']
+					})
 				
 				messages.success(request, 'Cadastro realizado com sucesso! Faça login para acessar o sistema.')
 				return redirect('login')
 			except Exception as e:
+				if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+					return JsonResponse({
+						'success': False,
+						'message': f'Erro ao criar usuário: {str(e)}'
+					})
 				messages.error(request, f'Erro ao criar usuário: {str(e)}')
+		else:
+			# Se houver erros de validação e for AJAX
+			if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+				errors = {}
+				for field, error_list in form.errors.items():
+					errors[field] = error_list[0]
+				return JsonResponse({
+					'success': False,
+					'errors': errors
+				})
 	else:
 		form = CadastroForm()
 	
 	return render(request, 'cadastro.html', {'form': form})
+
+def logout_view(request):
+	"""View customizada de logout que aceita GET e POST, redirecionando para landing page"""
+	logout(request)
+	return HttpResponseRedirect(reverse('landingpage'))

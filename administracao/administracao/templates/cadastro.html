@@ -328,11 +328,13 @@
                         <label for="id_username">Usuário</label>
                     </div>
                     <div class="input-wrapper">
-                        {{ form.username }}
+                        <input type="text" name="username" id="id_username" class="form-control" 
+                               autocomplete="username" required>
                     </div>
                     {% if form.username.errors %}
                         <div class="field-error">{{ form.username.errors.0 }}</div>
                     {% endif %}
+                    <div class="field-error" id="error_username"></div>
                 </div>
 
                 <div class="input-group">
@@ -341,11 +343,13 @@
                         <label for="id_email">E-mail</label>
                     </div>
                     <div class="input-wrapper">
-                        {{ form.email }}
+                        <input type="email" name="email" id="id_email" class="form-control" 
+                               autocomplete="email" required>
                     </div>
                     {% if form.email.errors %}
                         <div class="field-error">{{ form.email.errors.0 }}</div>
                     {% endif %}
+                    <div class="field-error" id="error_email"></div>
                 </div>
 
                 <div class="input-group">
@@ -354,11 +358,13 @@
                         <label for="id_password1">Senha</label>
                     </div>
                     <div class="input-wrapper">
-                        {{ form.password1 }}
+                        <input type="password" name="password1" id="id_password1" class="form-control" 
+                               autocomplete="new-password" required minlength="8">
                     </div>
                     {% if form.password1.errors %}
                         <div class="field-error">{{ form.password1.errors.0 }}</div>
                     {% endif %}
+                    <div class="field-error" id="error_password1"></div>
                 </div>
 
                 <div class="input-group">
@@ -367,11 +373,13 @@
                         <label for="id_password2">Confirmar Senha</label>
                     </div>
                     <div class="input-wrapper">
-                        {{ form.password2 }}
+                        <input type="password" name="password2" id="id_password2" class="form-control" 
+                               autocomplete="new-password" required minlength="8">
                     </div>
                     {% if form.password2.errors %}
                         <div class="field-error">{{ form.password2.errors.0 }}</div>
                     {% endif %}
+                    <div class="field-error" id="error_password2"></div>
                 </div>
 
                 <button type="submit" class="btn-submit">
@@ -396,8 +404,38 @@
     </div>
 </div>
 
+<!-- Modal de Sucesso -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle" style="font-size: 4rem; color: #22c55e;"></i>
+                </div>
+                <h3 class="mb-3" style="color: #0f172a; font-weight: 700;">Cadastro Realizado!</h3>
+                <p class="mb-4" style="color: #64748b; font-size: 1rem;">
+                    Sua conta foi criada com sucesso.<br>
+                    Você já pode fazer login no sistema.
+                </p>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="
+                    background: linear-gradient(90deg, #3b4cca 0%, #1e293b 100%);
+                    border: none;
+                    border-radius: 10px;
+                    padding: 12px 40px;
+                    font-weight: 600;
+                    min-width: 200px;
+                ">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Ir para Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Configurar placeholders
         const inputs = [
             {id: 'id_username', ph: 'Seu usuário'},
             {id: 'id_email', ph: 'seu@email.com'},
@@ -410,6 +448,84 @@
             if(el) {
                 el.setAttribute('placeholder', field.ph);
             }
+        });
+
+        // Submissão AJAX do formulário
+        const form = document.getElementById('cadastroForm');
+        const submitBtn = form.querySelector('.btn-submit');
+        const originalBtnText = submitBtn.innerHTML;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.cadastro-error').forEach(el => el.remove());
+            
+            // Desabilitar botão e mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cadastrando...';
+            
+            // Coletar dados do formulário
+            const formData = new FormData(form);
+            
+            // Enviar requisição AJAX
+            fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar modal de sucesso
+                    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                    modal.show();
+                    
+                    // Limpar formulário
+                    form.reset();
+                } else {
+                    // Mostrar erros nos campos
+                    if (data.errors) {
+                        for (const [field, error] of Object.entries(data.errors)) {
+                            const errorEl = document.getElementById(`error_${field}`);
+                            if (errorEl) {
+                                errorEl.textContent = error;
+                            } else if (field === '__all__' || field === 'non_field_errors') {
+                                // Erros gerais
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'cadastro-error';
+                                errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error}`;
+                                submitBtn.parentElement.appendChild(errorDiv);
+                            }
+                        }
+                    } else if (data.message) {
+                        // Mostrar mensagem de erro geral
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'cadastro-error';
+                        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message}`;
+                        submitBtn.parentElement.appendChild(errorDiv);
+                    }
+                    
+                    // Reabilitar botão
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'cadastro-error';
+                errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Erro ao processar cadastro. Tente novamente.';
+                submitBtn.parentElement.appendChild(errorDiv);
+                
+                // Reabilitar botão
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            });
         });
     });
 </script>

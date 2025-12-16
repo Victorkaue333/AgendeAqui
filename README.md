@@ -12,6 +12,16 @@
 
 [Sobre](#sobre) • [Funcionalidades](#-funcionalidades) • [Instalação](#-instalação) • [Uso](#-uso) • [Estrutura](#-estrutura-do-projeto) • [Contribuir](#-contribuindo)
 
+---
+
+## 📚 Documentação Completa
+
+- 📘 **[Documentação Técnica](DOCUMENTACAO_TECNICA.md)** - Arquitetura, modelos, fluxos, APIs
+- 🔗 **[Mapa de Integrações](MAPA_INTEGRACOES.md)** - Como os módulos se comunicam
+- 📝 **[Resumo das Implementações](RESUMO_IMPLEMENTACOES.md)** - O que foi feito e como funciona
+- 🚀 **[Guia Rápido de Uso](GUIA_RAPIDO.md)** - Como usar o sistema passo a passo
+- 📋 **[Plano de Implementação](PLANO_IMPLEMENTACAO.md)** - Status e próximos passos
+
 </div>
 
 ---
@@ -31,42 +41,62 @@ Ideal para:
 ## ✨ Funcionalidades
 
 ### 🔐 Autenticação & Segurança
-- Login seguro com controle de sessão
+- Login seguro com controle de sessão e Argon2
 - Recuperação de senha por email
-- Controle granular de permissões por função (Admin, Professor, Coordenação, Aluno)
-- Auditoria de ações no sistema
+- **3 níveis de permissão:** Professor (PRO), Coordenador (COO), Administrador (ADM)
+- Auditoria completa de ações administrativas (AuditLog)
+- Decorators customizados para controle de acesso
 
 ### 📍 Gestão de Espaços
 - Cadastro completo de salas, laboratórios e auditórios
-- Atributos customizáveis (capacidade, recursos disponíveis, horários)
-- Marcação de salas como indisponíveis
-- Visualização de disponibilidade em tempo real
+- Organização por blocos e recursos (projetor, quadro, computadores)
+- Capacidade e disponibilidade em tempo real
+- **Validação automática de conflitos de horários**
+- Estatísticas de uso por sala
 
 ### 📅 Agendamentos Inteligentes
-- Solicitação de reservas com validação automática
-- Fluxo de aprovação por coordenadores
-- Prevenção inteligente de conflitos de horários
-- Suporte a reservas recorrentes
-- Histórico completo de todas as requisições
+- **Validação completa:** horário comercial, duração, antecedência, conflitos
+- Fluxo de aprovação/reprovação com justificativa
+- **Notificações automáticas por email** (Celery + Redis)
+- Status visual: 🟡 Pendente, 🟢 Aprovado, 🔴 Reprovado
+- Calendário interativo (FullCalendar.js)
+- Histórico completo de todas as solicitações
+- Filtros avançados: data, sala, status, usuário
 
 ### 📊 Dashboard & Relatórios
-- Painel executivo com estatísticas em tempo real
-- Gráficos de utilização por espaço e período
-- Relatórios customizáveis em PDF/CSV
-- Análise de ociosidade de recursos
-- Exportação de dados para análise externa
+- **Dashboard diferenciado por perfil:**
+  - Professor: estatísticas pessoais
+  - Coordenador: estatísticas globais + pendentes
+  - Admin: gerenciamento completo do sistema
+- Gráficos em tempo real (Chart.js)
+- Top 5 salas mais utilizadas
+- Top 5 usuários mais ativos
+- Taxa de aprovação calculada
+- **Exportação CSV completa** (agendamentos + salas)
+- Filtros múltiplos e relatórios customizáveis
 
-### 🔔 Notificações
-- Notificações instantâneas no painel
-- Alertas por email para aprovação/rejeição
-- Lembretes automáticos de reservas
-- Notificação de espaços liberados
+### 🔔 Sistema de Notificações (Celery)
+- **Emails assíncronos:** aprovação, reprovação, cancelamento
+- **Lembretes automáticos** (Celery Beat): agendamentos de amanhã
+- Templates HTML customizados
+- Retry automático em caso de falha
+- Cleanup de agendamentos pendentes expirados (30+ dias)
 
-### 👥 Gestão de Usuários
-- Perfil completo do usuário
-- Histórico de agendamentos pessoais
-- Alteração de senha e dados cadastrais
-- Controle de atividades por período
+### 👥 Gestão de Usuários (Admin)
+- CRUD completo: criar, editar, excluir usuários
+- **Alterar tipo de perfil** (promover/rebaixar: PRO ↔ COO ↔ ADM)
+- Geração automática de senha temporária
+- Redefinir senha de qualquer usuário
+- Busca e filtros por tipo de perfil
+- Detalhes do usuário com histórico de agendamentos
+
+### 🎨 Experiência do Usuário
+- **Toast Notifications:** feedback visual (sucesso, erro, aviso, info)
+- **Ripple Effect:** animação em todos os botões
+- **Loading States:** spinners em formulários
+- Design responsivo (mobile-first)
+- Menu hambúrguer mobile
+- Interface moderna com Bootstrap 5.3
 
 ---
 

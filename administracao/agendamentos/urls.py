@@ -24,4 +24,5 @@ urlpatterns = [
     
     # Perfil do usuário
     path('meus-agendamentos/', views.meus_agendamentos, name='meus_agendamentos'),
+    path('<int:pk>/cancelar/', views.cancelar_agendamento, name='cancelar'),
 ]

@@ -7,28 +7,36 @@ from django.conf import settings
 from datetime import datetime, timedelta, time
 
 
-def validate_booking_advance(data):
+def validate_booking_advance(data, horario_inicio=None):
     """
     Valida se o agendamento está dentro do prazo permitido.
     """
-    hoje = timezone.now().date()
+    hoje = timezone.now()
     
-    # Antecedência mínima
-    min_advance = timedelta(hours=getattr(settings, 'MIN_BOOKING_ADVANCE_HOURS', 2))
-    earliest = timezone.now() + min_advance
-    
-    if data < earliest.date():
+    # Verifica se a data não é passada
+    if data < hoje.date():
         raise ValidationError(
-            f'Agendamentos devem ser feitos com pelo menos {settings.MIN_BOOKING_ADVANCE_HOURS} horas de antecedência.'
+            'Não é possível agendar para datas passadas.'
         )
     
-    # Antecedência máxima
-    max_advance = timedelta(days=getattr(settings, 'MAX_BOOKING_ADVANCE_DAYS', 30))
-    latest = hoje + max_advance
+    # Se for hoje, verifica se o horário não passou
+    if horario_inicio and data == hoje.date():
+        data_hora_agendamento = timezone.make_aware(
+            datetime.combine(data, horario_inicio)
+        )
+        
+        if data_hora_agendamento <= hoje:
+            raise ValidationError(
+                'Este horário já passou. Selecione um horário futuro.'
+            )
+    
+    # Antecedência máxima (30 dias)
+    max_advance = timedelta(days=30)
+    latest = hoje.date() + max_advance
     
     if data > latest:
         raise ValidationError(
-            f'Agendamentos só podem ser feitos com até {settings.MAX_BOOKING_ADVANCE_DAYS} dias de antecedência.'
+            'Agendamentos só podem ser feitos com até 30 dias de antecedência.'
         )
 
 
