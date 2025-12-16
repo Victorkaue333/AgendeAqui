@@ -41,6 +41,11 @@ def dashboard(request):
         status='A',
         data__gte=hoje
     ).select_related('sala').order_by('data', 'horario_inicio')[:5]
+
+    # Histórico do usuário (últimas atividades)
+    historico_agendamentos = Agendamento.objects.filter(
+        usuario=request.user
+    ).select_related('sala').order_by('-data', '-horario_inicio')[:10]
     
     # ========================================================================
     # DADOS ESPECÍFICOS POR PERFIL
@@ -53,12 +58,20 @@ def dashboard(request):
         'meus_agendamentos_pendentes': meus_agendamentos_pendentes,
         'meus_agendamentos_reprovados': meus_agendamentos_reprovados,
         'meus_proximos_agendamentos': meus_proximos_agendamentos,
+        # Aliases para compatibilidade com o template atual
+        'proximos_agendamentos': meus_proximos_agendamentos,
+        'historico_agendamentos': historico_agendamentos,
     }
     
     # COORDENADOR e ADMIN - dados globais
     if perfil.tipo in ['COO', 'ADM']:
         # Total de solicitações pendentes (TODOS os usuários)
         total_solicitacoes_pendentes = Agendamento.objects.filter(status='P').count()
+
+        # Lista curta de pendentes para exibir no dashboard
+        solicitacoes_pendentes_lista = Agendamento.objects.filter(
+            status='P'
+        ).select_related('usuario', 'sala').order_by('data', 'horario_inicio')[:5]
         
         # Estatísticas gerais
         total_agendamentos_sistema = Agendamento.objects.count()
@@ -77,15 +90,24 @@ def dashboard(request):
         agendamentos_recentes = Agendamento.objects.all().select_related(
             'usuario', 'sala'
         ).order_by('-criado_em')[:10]
+
+        # Contagens auxiliares do sistema
+        total_salas = Sala.objects.count()
+        usuarios_ativos = Agendamento.objects.values('usuario_id').distinct().count()
         
         context.update({
             'total_solicitacoes_pendentes': total_solicitacoes_pendentes,
+            # Nome usado no template
+            'solicitacoes_pendentes': total_solicitacoes_pendentes,
+            'solicitacoes_pendentes_lista': solicitacoes_pendentes_lista,
             'total_agendamentos_sistema': total_agendamentos_sistema,
             'total_aprovados_sistema': total_aprovados_sistema,
             'total_reprovados_sistema': total_reprovados_sistema,
             'salas_nomes': salas_nomes,
             'salas_counts': salas_counts,
             'agendamentos_recentes': agendamentos_recentes,
+            'total_salas': total_salas,
+            'usuarios_ativos': usuarios_ativos,
         })
     
     # APENAS ADMIN - dados de gerenciamento

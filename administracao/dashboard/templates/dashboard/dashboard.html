@@ -321,7 +321,13 @@
                 <i class="fas fa-calendar-check"></i>
             </div>
             <div class="stat-label">Total de Agendamentos</div>
-            <div class="stat-value">{{ meus_agendamentos_total }}</div>
+            <div class="stat-value">
+                {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+                    {{ total_agendamentos_sistema|default:0 }}
+                {% else %}
+                    {{ meus_agendamentos_total }}
+                {% endif %}
+            </div>
         </div>
 
         <!-- Agendamentos Aprovados -->
@@ -330,7 +336,13 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-label">Agendamentos Aprovados</div>
-            <div class="stat-value">{{ meus_agendamentos_aprovados }}</div>
+            <div class="stat-value">
+                {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+                    {{ total_aprovados_sistema|default:0 }}
+                {% else %}
+                    {{ meus_agendamentos_aprovados }}
+                {% endif %}
+            </div>
         </div>
 
         <!-- Agendamentos Pendentes -->
@@ -339,7 +351,13 @@
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-label">Aguardando Aprovação</div>
-            <div class="stat-value">{{ meus_agendamentos_pendentes }}</div>
+            <div class="stat-value">
+                {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+                    {{ total_solicitacoes_pendentes|default:0 }}
+                {% else %}
+                    {{ meus_agendamentos_pendentes }}
+                {% endif %}
+            </div>
         </div>
 
         <!-- Agendamentos Rejeitados -->
@@ -348,9 +366,16 @@
                 <i class="fas fa-times-circle"></i>
             </div>
             <div class="stat-label">Agendamentos Rejeitados</div>
-            <div class="stat-value">{{ meus_agendamentos_reprovados }}</div>
+            <div class="stat-value">
+                {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+                    {{ total_reprovados_sistema|default:0 }}
+                {% else %}
+                    {{ meus_agendamentos_reprovados }}
+                {% endif %}
+            </div>
         </div>
 
+        {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
         <!-- Total de Salas -->
         <div class="stat-card" style="border-left-color: #8b5cf6;">
             <div class="stat-icon" style="background: #f3e8ff; color: #8b5cf6;">
@@ -360,26 +385,29 @@
             <div class="stat-value">{{ total_salas }}</div>
         </div>
 
-        <!-- Usuários com Agendamentos -->
+        <!-- Usuários Ativos (com pelo menos 1 agendamento) -->
         <div class="stat-card" style="border-left-color: #06b6d4;">
             <div class="stat-icon" style="background: #cffafe; color: #06b6d4;">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-label">Usuários Ativos</div>
-            <div class="stat-value">{{ total_usuarios }}</div>
+            <div class="stat-value">{{ usuarios_ativos }}</div>
         </div>
+        {% endif %}
     </div>
 
     <!-- Charts Section -->
     <div class="charts-grid">
-        <!-- Room Usage Chart -->
-        <div class="chart-card">
-            <div class="chart-title">
-                <i class="fas fa-chart-bar"></i>
-                Salas Mais Utilizadas
+        {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+            <!-- Room Usage Chart -->
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Salas Mais Utilizadas
+                </div>
+                <canvas id="roomUsageChart"></canvas>
             </div>
-            <canvas id="roomUsageChart"></canvas>
-        </div>
+        {% endif %}
 
         <!-- Status Distribution Chart -->
         <div class="chart-card">
@@ -436,39 +464,30 @@
     {% endif %}
 
     <!-- Solicitações Pendentes (Coordenadores) -->
-    {% if solicitacoes_pendentes > 0 %}
+    {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
+    {% if solicitacoes_pendentes|default:0 > 0 %}
     <div class="section-title">
         <i class="fas fa-hourglass-half"></i>
         Solicitações Pendentes de Aprovação
+        <a href="{% url 'agendamentos:pendentes' %}" style="margin-left: auto; font-size: 0.85rem; color: #6366f1; text-decoration: none; font-weight: 500;">Ver pendentes →</a>
     </div>
 
     <div class="pending-approvals">
-        {% for agendamento in historico_agendamentos %}
-            {% if agendamento.status == 'P' %}
+        {% for agendamento in solicitacoes_pendentes_lista %}
             <div class="approval-item">
                 <div class="approval-info">
                     <h5>{{ agendamento.sala.nome }} - {{ agendamento.motivo }}</h5>
                     <p>Solicitado por <strong>{{ agendamento.usuario.first_name }}</strong> para {{ agendamento.data|date:"d/m/Y" }} às {{ agendamento.horario_inicio|time:"H:i" }}</p>
                 </div>
                 <div class="approval-actions">
-                    <button class="btn-approve" onclick="alert('Aprove no sistema de aprovação!')">
-                        <i class="fas fa-check me-1"></i>Aprovar
-                    </button>
-                    <button class="btn-reject" onclick="alert('Rejeite no sistema de aprovação!')">
-                        <i class="fas fa-times me-1"></i>Rejeitar
-                    </button>
+                    <a class="btn-approve" href="{% url 'agendamentos:approve' agendamento.id %}" style="text-decoration: none; display: inline-flex; align-items: center;">
+                        <i class="fas fa-clipboard-check me-1"></i>Revisar
+                    </a>
                 </div>
             </div>
-            {% endif %}
         {% endfor %}
-
-        {% if solicitacoes_pendentes == 0 %}
-        <div class="empty-state">
-            <i class="fas fa-check-circle"></i>
-            <p>Todas as solicitações foram processadas!</p>
-        </div>
-        {% endif %}
     </div>
+    {% endif %}
     {% endif %}
 
     <!-- Histórico de Atividades -->

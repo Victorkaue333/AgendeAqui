@@ -438,7 +438,7 @@
                 </div>
 
                 <!-- Status (apenas para admin/coordenador) -->
-                {% if perfil.tipo in 'COOादM' %}
+                {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
                 <div class="filter-group">
                     <label for="status">Status</label>
                     <select name="status" id="status">
@@ -500,7 +500,7 @@
                         <th>Data</th>
                         <th>Horário</th>
                         <th>Status</th>
-                        {% if perfil.tipo in 'COOादM' %}<th>Ações</th>{% endif %}
+                        {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}<th>Ações</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -521,7 +521,7 @@
                             <span class="status-badge status-reprovado">Reprovado</span>
                             {% endif %}
                         </td>
-                        {% if perfil.tipo in 'COOादM' %}
+                        {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
                         <td data-label="Ações">
                             <div class="table-actions">
                                 {% if agendamento.status == 'P' %}

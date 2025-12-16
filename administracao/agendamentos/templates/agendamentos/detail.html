@@ -396,7 +396,8 @@
                         </a>
 
                         <!-- Botões para Coordenadores (apenas pendentes) -->
-                        {% if perfil.tipo in 'COOादM' and agendamento.status == 'P' %}
+                        {% if agendamento.status == 'P' %}
+                        {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
                         <a href="{% url 'agendamentos:approve' agendamento.id %}" class="btn-custom btn-success">
                             <i class="fas fa-check"></i>
                             Aprovar Agendamento
@@ -405,6 +406,7 @@
                             <i class="fas fa-times"></i>
                             Reprovar Agendamento
                         </button>
+                        {% endif %}
                         {% endif %}
 
                         <!-- Botão Cancelar para o próprio usuário -->
