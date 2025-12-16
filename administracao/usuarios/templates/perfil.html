@@ -1,219 +1,358 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Perfil do Usuário - AgendeAqui{% endblock %}
+{% block title %}Meu Perfil - AgendeAqui{% endblock %}
 
 {% block content %}
 <style>
     .profile-container {
+        max-width: 1400px;
+        margin: 0 auto;
         padding: 2rem;
-        background: #f5f7fa;
-        min-height: calc(100vh - 80px);
     }
 
     .profile-header {
-        background: linear-gradient(135deg, #6366f1 0%, #3b4cca 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 2rem;
-        border-radius: 12px;
+        padding: 3rem 2rem;
+        border-radius: 16px;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
     }
 
     .profile-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        border: 4px solid rgba(255, 255, 255, 0.5);
+        font-size: 3.5rem;
+        border: 5px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+
+    .profile-avatar:hover .avatar-upload-overlay {
+        opacity: 1;
+    }
+
+    .avatar-upload-overlay i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    #avatarInput {
+        display: none;
     }
 
     .profile-info h2 {
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
 
     .profile-info p {
-        opacity: 0.9;
-        margin: 0.3rem 0;
+        opacity: 0.95;
+        margin: 0.75rem 0;
+        font-size: 1.05rem;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .profile-info p i {
+        font-size: 1.1rem;
     }
 
     .card-section {
         background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 2rem;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+    }
+
+    .card-section:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
     }
 
     .section-title {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 1.5rem;
+        color: #1e293b;
+        margin-bottom: 2rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
     }
 
     .info-field {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem 0;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 1.25rem 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .info-field:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
     }
 
     .info-field:last-child {
-        border-bottom: none;
+        margin-bottom: 0;
     }
 
     .field-label {
         color: #64748b;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .field-label i {
+        color: #94a3b8;
+        font-size: 1.1rem;
     }
 
     .field-value {
-        color: #0f172a;
-        font-weight: 500;
-        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 1.05rem;
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.75rem;
     }
 
     .form-group label {
         display: block;
-        color: #0f172a;
+        color: #1e293b;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
     }
 
     .form-group input,
     .form-group textarea {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
         font-family: inherit;
+        transition: all 0.2s ease;
+        background: #f8fafc;
     }
 
     .form-group input:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
     }
 
     .btn-primary-custom {
-        background: #6366f1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-primary-custom:hover {
-        background: #4f46e5;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary-custom:active {
+        transform: translateY(-1px);
     }
 
     .btn-secondary-custom {
-        background: #e2e8f0;
-        color: #0f172a;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-secondary-custom:hover {
-        background: #cbd5e1;
+        background: white;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .activity-item {
         display: flex;
         align-items: start;
-        gap: 1rem;
-        padding: 1rem 0;
-        border-bottom: 1px solid #e2e8f0;
+        gap: 1.25rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .activity-item:last-child {
-        border-bottom: none;
+        margin-bottom: 0;
     }
 
     .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #e0e7ff;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #4f46e5;
+        color: #5b21b6;
         flex-shrink: 0;
+        font-size: 1.25rem;
     }
 
     .activity-content h5 {
-        color: #0f172a;
-        margin-bottom: 0.2rem;
-        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
     }
 
     .activity-content p {
         color: #64748b;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         margin: 0;
+        line-height: 1.6;
     }
 
     .badge-custom {
         display: inline-block;
-        background: #e0e7ff;
-        color: #4338ca;
-        padding: 0.4rem 0.8rem;
-        border-radius: 6px;
-        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
         font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        margin-left: 0.5rem;
     }
 
     .tabs {
         display: flex;
-        gap: 1rem;
-        border-bottom: 2px solid #e2e8f0;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 14px;
         margin-bottom: 2rem;
     }
 
     .tab-btn {
-        background: none;
+        background: transparent;
         border: none;
-        padding: 1rem 1.5rem;
+        padding: 1rem 1.75rem;
         color: #64748b;
         font-weight: 600;
         cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
     }
 
     .tab-btn.active {
-        color: #6366f1;
-        border-bottom-color: #6366f1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .tab-content {
@@ -250,40 +389,52 @@
 <div class="profile-container">
     <!-- Header do Perfil -->
     <div class="profile-header">
-        <div class="d-flex align-items-center">
-            <div class="profile-avatar">
-                <i class="fas fa-user"></i>
+        <div class="d-flex align-items-center gap-4">
+            <div class="profile-avatar" onclick="document.getElementById('avatarInput').click()">
+                {% if perfil_usuario.foto %}
+                    <img src="{{ perfil_usuario.foto.url }}" alt="Foto de perfil">
+                {% else %}
+                    <i class="fas fa-user"></i>
+                {% endif %}
+                <div class="avatar-upload-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
             </div>
+            <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)">
+            
             <div class="profile-info">
                 <h2>{{ user.get_full_name|default:user.username }}</h2>
                 <p>
-                    <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                    <i class="fas fa-envelope"></i>
+                    <span>{{ user.email }}</span>
                 </p>
                 <p>
-                    <i class="fas fa-id-badge me-2"></i>
-                    {% if user.groups.exists %}
-                        {% for group in user.groups.all %}
-                            <span class="badge-custom">{{ group.name }}</span>
-                        {% endfor %}
-                    {% else %}
-                        <span class="badge-custom">Usuário</span>
-                    {% endif %}
+                    <i class="fas fa-id-badge"></i>
+                    <span>
+                        {% if user.groups.exists %}
+                            {% for group in user.groups.all %}
+                                <span class="badge-custom">{{ group.name }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="badge-custom">Usuário</span>
+                        {% endif %}
+                    </span>
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Abas -->
-    <div style="background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 0 2rem;">
+    <div style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 0.5rem; margin-bottom: 2rem;">
         <div class="tabs">
             <button class="tab-btn active" data-tab="dados">
-                <i class="fas fa-user-circle me-1"></i>Dados Pessoais
+                <i class="fas fa-user-circle"></i>Dados Pessoais
             </button>
             <button class="tab-btn" data-tab="seguranca">
-                <i class="fas fa-lock me-1"></i>Segurança
+                <i class="fas fa-shield-alt"></i>Segurança
             </button>
             <button class="tab-btn" data-tab="atividades">
-                <i class="fas fa-history me-1"></i>Histórico de Atividades
+                <i class="fas fa-history"></i>Histórico
             </button>
         </div>
     </div>
@@ -292,19 +443,29 @@
     <div id="dados" class="tab-content active">
         <div class="card-section">
             <div class="section-title">
-                <i class="fas fa-user-circle" style="color: #6366f1;"></i>Informações Pessoais
+                <i class="fas fa-user-circle" style="color: #667eea;"></i>
+                <span>Informações Pessoais</span>
             </div>
             
             <div class="info-field">
-                <span class="field-label">Nome Completo:</span>
+                <span class="field-label">
+                    <i class="fas fa-user"></i>
+                    Nome Completo
+                </span>
                 <span class="field-value">{{ user.get_full_name|default:"Não informado" }}</span>
             </div>
             <div class="info-field">
-                <span class="field-label">Email:</span>
+                <span class="field-label">
+                    <i class="fas fa-envelope"></i>
+                    Email
+                </span>
                 <span class="field-value">{{ user.email }}</span>
             </div>
             <div class="info-field">
-                <span class="field-label">Cargo/Função:</span>
+                <span class="field-label">
+                    <i class="fas fa-briefcase"></i>
+                    Cargo/Função
+                </span>
                 <span class="field-value">
                     {% if user.groups.exists %}
                         {% for group in user.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
@@ -314,20 +475,33 @@
                 </span>
             </div>
             <div class="info-field">
-                <span class="field-label">Data de Cadastro:</span>
+                <span class="field-label">
+                    <i class="fas fa-calendar-plus"></i>
+                    Data de Cadastro
+                </span>
                 <span class="field-value">{{ user.date_joined|date:"d/m/Y" }}</span>
             </div>
             <div class="info-field">
-                <span class="field-label">Último Acesso:</span>
+                <span class="field-label">
+                    <i class="fas fa-clock"></i>
+                    Último Acesso
+                </span>
                 <span class="field-value">{{ user.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</span>
             </div>
 
-            <div style="margin-top: 2rem;">
-                <button class="btn-primary-custom" onclick="document.getElementById('editForm').style.display = 'block'">
-                    <i class="fas fa-edit me-2"></i>Editar Informações
+            <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 2px solid #f1f5f9;">
+                <button class="btn-primary-custom" onclick="document.getElementById('editForm').style.display = 'block'; this.parentElement.style.display = 'none';">
+                    <i class="fas fa-edit"></i>
+                    <span>Editar Informações</span>
                 </button>
             </div>
         </div>
+
+        <div class="card-section" id="editForm" style="display: none;">
+            <div class="section-title">
+                <i class="fas fa-user-edit" style="color: #667eea;"></i>
+                <span>Editar Perfil</span>
+            </div>
 
             <form method="post" action="{% url 'usuarios:perfil' %}">
                 {% csrf_token %}
@@ -347,12 +521,14 @@
                     <input type="email" id="email" name="email" value="{{ user.email }}" required>
                 </div>
 
-                <div style="display: flex; gap: 1rem;">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <button type="submit" class="btn-primary-custom">
-                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                        <i class="fas fa-save"></i>
+                        <span>Salvar Alterações</span>
                     </button>
-                    <button type="button" class="btn-secondary-custom" onclick="document.getElementById('editForm').style.display = 'none'">
-                        Cancelar
+                    <button type="button" class="btn-secondary-custom" onclick="document.getElementById('editForm').style.display = 'none'; document.getElementById('editForm').previousElementSibling.querySelector('.btn-primary-custom').parentElement.style.display = 'block';">
+                        <i class="fas fa-times"></i>
+                        <span>Cancelar</span>
                     </button>
                 </div>
             </form>
@@ -361,31 +537,45 @@
 
     <!-- Aba 2: Segurança -->
     <div id="seguranca" class="tab-content">
+        <div class="card-section">
+            <div class="section-title">
+                <i class="fas fa-shield-alt" style="color: #667eea;"></i>
+                <span>Alterar Senha</span>
+            </div>
+
             <form method="post" action="{% url 'usuarios:perfil' %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="change_password">
+                
                 <div class="form-group">
-                    <label for="old_password">Senha Atual:</label>
-                    <input type="password" id="old_password" name="old_password" required>
+                    <label for="old_password">
+                        <i class="fas fa-lock text-muted me-2"></i>Senha Atual
+                    </label>
+                    <input type="password" id="old_password" name="old_password" placeholder="Digite sua senha atual" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="new_password1">Nova Senha:</label>
-                    <input type="password" id="new_password1" name="new_password1" required>
+                    <label for="new_password1">
+                        <i class="fas fa-key text-muted me-2"></i>Nova Senha
+                    </label>
+                    <input type="password" id="new_password1" name="new_password1" placeholder="Digite a nova senha" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="new_password2">Confirmar Nova Senha:</label>
-                    <input type="password" id="new_password2" name="new_password2" required>
+                    <label for="new_password2">
+                        <i class="fas fa-check-circle text-muted me-2"></i>Confirmar Nova Senha
+                    </label>
+                    <input type="password" id="new_password2" name="new_password2" placeholder="Confirme a nova senha" required>
                 </div>
 
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    A senha deve ter pelo menos 8 caracteres.
+                <div class="alert alert-info d-flex align-items-center gap-2" style="background: #e0f2fe; border: 2px solid #bae6fd; border-radius: 12px; padding: 1rem 1.25rem;">
+                    <i class="fas fa-info-circle" style="color: #0369a1;"></i>
+                    <span style="color: #0c4a6e;">A senha deve ter pelo menos 8 caracteres.</span>
                 </div>
 
                 <button type="submit" class="btn-primary-custom">
-                    <i class="fas fa-key me-2"></i>Atualizar Senha
+                    <i class="fas fa-key"></i>
+                    <span>Atualizar Senha</span>
                 </button>
             </form>
         </div>
@@ -395,7 +585,8 @@
     <div id="atividades" class="tab-content">
         <div class="card-section">
             <div class="section-title">
-                <i class="fas fa-history" style="color: #6366f1;"></i>Histórico de Agendamentos
+                <i class="fas fa-history" style="color: #667eea;"></i>
+                <span>Histórico de Agendamentos</span>
             </div>
 
             {% if historico_agendamentos %}
@@ -407,10 +598,11 @@
                     <div class="activity-content">
                         <h5>{{ agendamento.sala.nome }}</h5>
                         <p>
-                            <strong>Data:</strong> {{ agendamento.data|date:"d/m/Y" }}<br>
-                            <strong>Horário:</strong> {{ agendamento.horario_inicio|time:"H:i" }} - {{ agendamento.horario_fim|time:"H:i" }}<br>
-                            <strong>Status:</strong> 
-                            <span class="badge" style="background: {% if agendamento.status == 'Aprovado' %}#dcfce7{% elif agendamento.status == 'Pendente' %}#fef3c7{% else %}#fee2e2{% endif %}; color: {% if agendamento.status == 'Aprovado' %}#166534{% elif agendamento.status == 'Pendente' %}#92400e{% else %}#991b1b{% endif %};">
+                            <strong><i class="fas fa-calendar-day me-1"></i>Data:</strong> {{ agendamento.data|date:"d/m/Y" }}<br>
+                            <strong><i class="fas fa-clock me-1"></i>Horário:</strong> {{ agendamento.horario_inicio|time:"H:i" }} - {{ agendamento.horario_fim|time:"H:i" }}<br>
+                            <strong><i class="fas fa-info-circle me-1"></i>Status:</strong> 
+                            <span class="badge" style="background: {% if agendamento.status == 'Aprovado' %}linear-gradient(135deg, #d9f99d 0%, #bef264 100%){% elif agendamento.status == 'Pendente' %}linear-gradient(135deg, #fef3c7 0%, #fde68a 100%){% else %}linear-gradient(135deg, #fecaca 0%, #fca5a5 100%){% endif %}; color: {% if agendamento.status == 'Aprovado' %}#365314{% elif agendamento.status == 'Pendente' %}#78350f{% else %}#7f1d1d{% endif %}; padding: 0.4rem 0.9rem; border-radius: 8px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fas {% if agendamento.status == 'Aprovado' %}fa-check-circle{% elif agendamento.status == 'Pendente' %}fa-clock{% else %}fa-times-circle{% endif %} me-1"></i>
                                 {{ agendamento.get_status_display }}
                             </span>
                         </p>
@@ -418,9 +610,12 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="text-align: center; padding: 2rem; color: #64748b;">
-                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: #cbd5e1;"></i>
-                    <p>Nenhum agendamento realizado ainda.</p>
+                <div style="text-align: center; padding: 4rem 2rem; color: #64748b;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-calendar-times" style="font-size: 2.5rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h4 style="color: #475569; margin-bottom: 0.5rem;">Nenhum agendamento ainda</h4>
+                    <p style="margin: 0;">Seus agendamentos futuros aparecerão aqui.</p>
                 </div>
             {% endif %}
         </div>
@@ -445,6 +640,65 @@
             document.getElementById(tabName).classList.add('active');
         });
     });
+
+    // Preview e upload de avatar
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const avatar = document.querySelector('.profile-avatar');
+                
+                // Remove ícone se existir
+                const icon = avatar.querySelector('i.fa-user');
+                if (icon) {
+                    icon.remove();
+                }
+                
+                // Adiciona ou atualiza imagem
+                let img = avatar.querySelector('img');
+                if (!img) {
+                    img = document.createElement('img');
+                    avatar.insertBefore(img, avatar.firstChild);
+                }
+                img.src = e.target.result;
+                
+                // Fazer upload via AJAX
+                uploadAvatar(input.files[0]);
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function uploadAvatar(file) {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        formData.append('action', 'upload_avatar');
+
+        fetch('{% url "usuarios:perfil" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Avatar atualizado com sucesso');
+            } else {
+                alert('Erro ao atualizar avatar: ' + (data.error || 'Erro desconhecido'));
+                location.reload(); // Recarrega para mostrar avatar anterior
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao fazer upload da foto');
+            location.reload();
+        });
+    }
 </script>
 
 {% endblock %}

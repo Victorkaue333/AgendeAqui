@@ -117,8 +117,19 @@ def index(request):
     todos_blocos = Bloco.objects.all().order_by('nome')
     todos_usuarios = User.objects.filter(perfil__isnull=False).order_by('first_name', 'last_name')
     
-    # Lista de agendamentos (últimos 50 para exibição na tabela)
-    agendamentos_recentes = agendamentos_qs.order_by('-data', '-criado_em')[:50]
+    # Lista de agendamentos com paginação
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
+    agendamentos_list = agendamentos_qs.order_by('-data', '-criado_em')
+    paginator = Paginator(agendamentos_list, 15)  # 15 por página
+    
+    page = request.GET.get('page', 1)
+    try:
+        agendamentos_recentes = paginator.page(page)
+    except PageNotAnInteger:
+        agendamentos_recentes = paginator.page(1)
+    except EmptyPage:
+        agendamentos_recentes = paginator.page(paginator.num_pages)
     
     context = {
         'perfil': perfil,
@@ -134,6 +145,7 @@ def index(request):
         'usuarios_chart': usuarios_chart,
         # Tabelas
         'agendamentos_recentes': agendamentos_recentes,
+        'is_paginated': paginator.num_pages > 1,
         # Filtros
         'todas_salas': todas_salas,
         'todos_blocos': todos_blocos,

@@ -200,18 +200,26 @@
     }
 
     .agendamentos-table thead {
-        background: #f8fafc;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-bottom: 2px solid #e2e8f0;
     }
 
     .agendamentos-table th {
-        padding: 1rem;
+        padding: 1.25rem 1rem;
         text-align: left;
-        font-weight: 600;
-        color: #0f172a;
+        font-weight: 700;
+        color: white;
         font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+    
+    .agendamentos-table thead tr th:first-child {
+        border-top-left-radius: 12px;
+    }
+    
+    .agendamentos-table thead tr th:last-child {
+        border-top-right-radius: 12px;
     }
 
     .agendamentos-table td {
@@ -219,8 +227,14 @@
         border-bottom: 1px solid #e2e8f0;
     }
 
+    .agendamentos-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
     .agendamentos-table tbody tr:hover {
         background: #f8fafc;
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .sala-name {
@@ -233,28 +247,38 @@
     }
 
     .status-badge {
-        display: inline-block;
-        padding: 0.5rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1rem;
         border-radius: 50px;
         font-size: 0.8rem;
         font-weight: 600;
         text-align: center;
-        min-width: 80px;
+        min-width: 90px;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .status-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .status-pendente {
-        background: #fef3c7;
-        color: #b45309;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: white;
     }
 
     .status-aprovado {
-        background: #d1fae5;
-        color: #065f46;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
     }
 
     .status-reprovado {
-        background: #fee2e2;
-        color: #991b1b;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
     }
 
     .horario {
@@ -357,6 +381,52 @@
         font-size: 3rem;
         color: #cbd5e1;
         margin-bottom: 1rem;
+    }
+
+    /* Paginação */
+    .pagination-container {
+        margin-top: 2rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 2rem 1.5rem;
+        background: white;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .pagination a, .pagination span {
+        padding: 0.75rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #475569;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 45px;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .pagination a:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .pagination .current {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
     /* Responsivo */
@@ -514,11 +584,11 @@
                         <td data-label="Horário" class="horario">{{ agendamento.horario_inicio|time:"H:i" }} — {{ agendamento.horario_fim|time:"H:i" }}</td>
                         <td data-label="Status">
                             {% if agendamento.status == 'P' %}
-                            <span class="status-badge status-pendente">Pendente</span>
+                            <span class="status-badge status-pendente"><i class="fas fa-clock"></i> Pendente</span>
                             {% elif agendamento.status == 'A' %}
-                            <span class="status-badge status-aprovado">Aprovado</span>
+                            <span class="status-badge status-aprovado"><i class="fas fa-check-circle"></i> Aprovado</span>
                             {% elif agendamento.status == 'R' %}
-                            <span class="status-badge status-reprovado">Reprovado</span>
+                            <span class="status-badge status-reprovado"><i class="fas fa-times-circle"></i> Reprovado</span>
                             {% endif %}
                         </td>
                         {% if perfil.tipo == 'COO' or perfil.tipo == 'ADM' %}
@@ -547,6 +617,35 @@
                 </tbody>
             </table>
         </div>
+        
+        {% if is_paginated %}
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if agendamentos.has_previous %}
+                    <a href="?page=1{% if sala_id_filter %}&sala={{ sala_id_filter }}{% endif %}{% if data_inicio_filter %}&data_inicio={{ data_inicio_filter }}{% endif %}{% if data_fim_filter %}&data_fim={{ data_fim_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" title="Primeira página">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ agendamentos.previous_page_number }}{% if sala_id_filter %}&sala={{ sala_id_filter }}{% endif %}{% if data_inicio_filter %}&data_inicio={{ data_inicio_filter }}{% endif %}{% if data_fim_filter %}&data_fim={{ data_fim_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" title="Página anterior">
+                        <i class="fas fa-angle-left"></i> Anterior
+                    </a>
+                {% endif %}
+                
+                <span class="current">
+                    Página {{ agendamentos.number }} de {{ agendamentos.paginator.num_pages }}
+                </span>
+                
+                {% if agendamentos.has_next %}
+                    <a href="?page={{ agendamentos.next_page_number }}{% if sala_id_filter %}&sala={{ sala_id_filter }}{% endif %}{% if data_inicio_filter %}&data_inicio={{ data_inicio_filter }}{% endif %}{% if data_fim_filter %}&data_fim={{ data_fim_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" title="Próxima página">
+                        Próxima <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ agendamentos.paginator.num_pages }}{% if sala_id_filter %}&sala={{ sala_id_filter }}{% endif %}{% if data_inicio_filter %}&data_inicio={{ data_inicio_filter }}{% endif %}{% if data_fim_filter %}&data_fim={{ data_fim_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" title="Última página">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
         {% else %}
         <div class="empty-state">
             <div class="empty-icon">

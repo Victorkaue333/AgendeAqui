@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
+from django.http import JsonResponse
 from agendamentos.models import Agendamento
 from administracao.models import Perfil, AuditLog
 from .forms import UserRegistrationForm, AlterarPerfilForm, CriarUsuarioForm
@@ -58,6 +59,9 @@ def cadastro(request):
 def perfil(request):
     """Visualizar e editar perfil do usuário"""
     
+    # Garantir que o perfil existe
+    perfil_usuario, created = Perfil.objects.get_or_create(usuario=request.user, defaults={'tipo': 'PRO'})
+    
     # Histórico de agendamentos
     historico_agendamentos = Agendamento.objects.filter(
         usuario=request.user
@@ -66,7 +70,15 @@ def perfil(request):
     if request.method == 'POST':
         action = request.POST.get('action', 'update')
         
-        if action == 'change_password':
+        if action == 'upload_avatar':
+            # Upload de avatar via AJAX
+            if 'avatar' in request.FILES:
+                perfil_usuario.foto = request.FILES['avatar']
+                perfil_usuario.save()
+                return JsonResponse({'success': True, 'message': 'Avatar atualizado com sucesso!'})
+            return JsonResponse({'success': False, 'error': 'Nenhum arquivo enviado'}, status=400)
+        
+        elif action == 'change_password':
             # Mudar senha
             old_password = request.POST.get('old_password', '')
             new_password1 = request.POST.get('new_password1', '')
@@ -93,6 +105,7 @@ def perfil(request):
     
     context = {
         'historico_agendamentos': historico_agendamentos,
+        'perfil_usuario': perfil_usuario,
     }
     
     return render(request, 'perfil.html', context)

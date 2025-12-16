@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.db.models import Q
+from django.db.models import Q, Case, When, IntegerField
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import datetime
 import threading
 
@@ -163,24 +164,46 @@ def agendamentos(request):
     if perfil.tipo in ['COO', 'ADM'] and status_filter:
         agendamentos_list = agendamentos_list.filter(status=status_filter)
     
-    # Ordenar por data e horário
-    agendamentos_list = agendamentos_list.order_by('data', 'horario_inicio')
+    # Ordenar: Pendentes primeiro, depois Reprovados, depois Aprovados
+    # Prioridade: P (Pendente) = 1, R (Reprovado) = 2, A (Aprovado) = 3
+    agendamentos_list = agendamentos_list.annotate(
+        status_order=Case(
+            When(status='P', then=1),
+            When(status='R', then=2),
+            When(status='A', then=3),
+            default=4,
+            output_field=IntegerField()
+        )
+    ).order_by('status_order', 'data', 'horario_inicio')
     
-    # Estatísticas
+    # Estatísticas (antes da paginação)
     agendamentos_total = agendamentos_list.count()
     agendamentos_aprovados = agendamentos_list.filter(status='A').count()
     agendamentos_pendentes = agendamentos_list.filter(status='P').count()
     agendamentos_rejeitados = agendamentos_list.filter(status='R').count()
+    
+    # Paginação - 15 itens por página
+    paginator = Paginator(agendamentos_list, 15)
+    page = request.GET.get('page', 1)
+    
+    try:
+        agendamentos_page = paginator.page(page)
+    except PageNotAnInteger:
+        agendamentos_page = paginator.page(1)
+    except EmptyPage:
+        agendamentos_page = paginator.page(paginator.num_pages)
 
     context = {
         'salas': salas,
-        'agendamentos': agendamentos_list,
+        'agendamentos': agendamentos_page,
         'perfil': perfil,
         # Estatísticas
         'agendamentos_total': agendamentos_total,
         'agendamentos_aprovados': agendamentos_aprovados,
         'agendamentos_pendentes': agendamentos_pendentes,
         'agendamentos_rejeitados': agendamentos_rejeitados,
+        # Paginação
+        'is_paginated': paginator.num_pages > 1,
         # Filtros (para manter valores nos inputs)
         'sala_id_filter': sala_id,
         'data_inicio_filter': data_inicio,
