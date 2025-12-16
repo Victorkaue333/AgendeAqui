@@ -4,61 +4,99 @@
 
 {% block content %}
 <div class="container-fluid">
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
     <div>
-      <h2 class="fw-bold mb-1">Notificações</h2>
-      <p class="text-muted mb-0">Você tem <strong>{{ nao_lidas }}</strong> não lida(s).</p>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-bold mb-0">Notificações</h2>
+        {% if nao_lidas and nao_lidas > 0 %}
+          <span class="badge text-bg-danger">{{ nao_lidas }}</span>
+        {% endif %}
+      </div>
+      <p class="text-muted mb-0 mt-1">Acompanhe aprovações e reprovações dos seus agendamentos.</p>
     </div>
-
-    <form method="post" action="{% url 'notificacoes:marcar_todas_lidas' %}" class="m-0">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-outline-primary" {% if nao_lidas == 0 %}disabled{% endif %}>
-        Marcar todas como lidas
-      </button>
-    </form>
   </div>
 
   <div class="card">
-    <div class="card-body">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="fw-semibold">Sua caixa de entrada</span>
+      <form method="post" action="{% url 'notificacoes:marcar_todas_lidas' %}" class="m-0">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-primary" {% if nao_lidas == 0 %}disabled{% endif %}>
+          <i class="fas fa-check-double me-1"></i>
+          Marcar todas como lidas
+        </button>
+      </form>
+    </div>
+
+    <div class="card-body p-0">
       {% if notificacoes %}
-        <div class="list-group">
+        <div class="list-group list-group-flush">
           {% for n in notificacoes %}
-            <div class="list-group-item d-flex align-items-start justify-content-between gap-3">
-              <div class="flex-grow-1">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge text-bg-{% if n.nivel == 'success' %}success{% elif n.nivel == 'warning' %}warning{% elif n.nivel == 'danger' %}danger{% else %}secondary{% endif %}">
-                    {{ n.get_nivel_display }}
-                  </span>
+            <div class="list-group-item {% if not n.lida %}border-start border-4 border-primary bg-body-tertiary{% endif %}">
+              <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                <div class="d-flex gap-3 flex-grow-1">
+                  <div class="flex-shrink-0">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-2 {% if n.nivel == 'success' %}bg-success-subtle text-success{% elif n.nivel == 'warning' %}bg-warning-subtle text-warning{% elif n.nivel == 'danger' %}bg-danger-subtle text-danger{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                      {% if n.nivel == 'success' %}
+                        <i class="fas fa-circle-check fa-lg"></i>
+                      {% elif n.nivel == 'warning' %}
+                        <i class="fas fa-triangle-exclamation fa-lg"></i>
+                      {% elif n.nivel == 'danger' %}
+                        <i class="fas fa-circle-xmark fa-lg"></i>
+                      {% else %}
+                        <i class="fas fa-circle-info fa-lg"></i>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="badge text-bg-{% if n.nivel == 'success' %}success{% elif n.nivel == 'warning' %}warning{% elif n.nivel == 'danger' %}danger{% else %}secondary{% endif %}">
+                          {{ n.get_nivel_display }}
+                        </span>
+                        {% if not n.lida %}
+                          <span class="badge text-bg-primary">Nova</span>
+                        {% else %}
+                          <span class="text-muted small d-inline-flex align-items-center gap-1"><i class="fas fa-check"></i> Lida</span>
+                        {% endif %}
+                      </div>
+                      <span class="text-muted small">{{ n.criada_em|date:"d/m/Y H:i" }}</span>
+                    </div>
+
+                    <div class="fw-semibold mt-1">{{ n.titulo }}</div>
+                    <div class="text-muted small mt-1">{{ n.mensagem }}</div>
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-start gap-2">
+                  {% if n.url %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ n.url }}">
+                      Abrir <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                  {% endif %}
+
                   {% if not n.lida %}
-                    <span class="badge text-bg-primary">Nova</span>
+                    <form method="post" action="{% url 'notificacoes:marcar_lida' n.id %}" class="m-0">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-check me-1"></i>
+                        Marcar como lida
+                      </button>
+                    </form>
                   {% endif %}
                 </div>
-                <div class="fw-semibold">{{ n.titulo }}</div>
-                <div class="text-muted small">{{ n.mensagem }}</div>
-                <div class="text-muted small mt-2">{{ n.criada_em|date:"d/m/Y H:i" }}</div>
-              </div>
-
-              <div class="d-flex flex-column align-items-end gap-2">
-                {% if not n.lida %}
-                  <form method="post" action="{% url 'notificacoes:marcar_lida' n.id %}" class="m-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-primary">Marcar como lida</button>
-                  </form>
-                {% else %}
-                  <span class="text-muted small">Lida</span>
-                {% endif %}
-
-                {% if n.url %}
-                  <a class="btn btn-sm btn-outline-secondary" href="{{ n.url }}">Ver</a>
-                {% endif %}
               </div>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <div class="text-center py-5">
-          <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
-          <p class="text-muted mb-0">Você ainda não tem notificações.</p>
+        <div class="text-center py-5 px-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle text-secondary p-3 mb-3">
+            <i class="fas fa-bell-slash fa-xl"></i>
+          </div>
+          <p class="fw-semibold mb-1">Nada por aqui ainda</p>
+          <p class="text-muted mb-0">Quando seus agendamentos forem aprovados ou reprovados, você verá o feedback nesta tela.</p>
         </div>
       {% endif %}
     </div>

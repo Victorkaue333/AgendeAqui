@@ -29,9 +29,7 @@ def marcar_lida(request, notificacao_id: int):
         notificacao.lida_em = timezone.now()
         notificacao.save(update_fields=['lida', 'lida_em'])
 
-    if notificacao.url:
-        return redirect(notificacao.url)
-
+    # Sempre redirecionar de volta para lista de notificações
     return redirect('notificacoes:lista')
 
 
