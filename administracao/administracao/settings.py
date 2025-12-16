@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'relatorios',
     'dashboard',
     'usuarios',
+    'notificacoes',
 ]
 
 # Crispy Forms
@@ -107,6 +108,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
+                'notificacoes.context_processors.notificacoes_nav',
             ],
         },
     },

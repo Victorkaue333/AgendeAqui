@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Notificações - AgendeAqui{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Notificações</h2>
+      <p class="text-muted mb-0">Você tem <strong>{{ nao_lidas }}</strong> não lida(s).</p>
+    </div>
+
+    <form method="post" action="{% url 'notificacoes:marcar_todas_lidas' %}" class="m-0">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary" {% if nao_lidas == 0 %}disabled{% endif %}>
+        Marcar todas como lidas
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      {% if notificacoes %}
+        <div class="list-group">
+          {% for n in notificacoes %}
+            <div class="list-group-item d-flex align-items-start justify-content-between gap-3">
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge text-bg-{% if n.nivel == 'success' %}success{% elif n.nivel == 'warning' %}warning{% elif n.nivel == 'danger' %}danger{% else %}secondary{% endif %}">
+                    {{ n.get_nivel_display }}
+                  </span>
+                  {% if not n.lida %}
+                    <span class="badge text-bg-primary">Nova</span>
+                  {% endif %}
+                </div>
+                <div class="fw-semibold">{{ n.titulo }}</div>
+                <div class="text-muted small">{{ n.mensagem }}</div>
+                <div class="text-muted small mt-2">{{ n.criada_em|date:"d/m/Y H:i" }}</div>
+              </div>
+
+              <div class="d-flex flex-column align-items-end gap-2">
+                {% if not n.lida %}
+                  <form method="post" action="{% url 'notificacoes:marcar_lida' n.id %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-primary">Marcar como lida</button>
+                  </form>
+                {% else %}
+                  <span class="text-muted small">Lida</span>
+                {% endif %}
+
+                {% if n.url %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ n.url }}">Ver</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
+          <p class="text-muted mb-0">Você ainda não tem notificações.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

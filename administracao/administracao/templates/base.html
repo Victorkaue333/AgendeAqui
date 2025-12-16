@@ -695,6 +695,19 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+
+                <!-- Notificações - Todos os perfis -->
+                <li class="nav-item">
+                    <a href="{% url 'notificacoes:lista' %}" class="nav-link-custom {% if 'notificacoes' in request.path %}active{% endif %}">
+                        <i class="fas fa-bell"></i>
+                        <span class="d-flex align-items-center justify-content-between w-100">
+                            <span>Notificações</span>
+                            {% if notificacoes_nao_lidas and notificacoes_nao_lidas > 0 %}
+                                <span class="badge text-bg-danger ms-2">{{ notificacoes_nao_lidas }}</span>
+                            {% endif %}
+                        </span>
+                    </a>
+                </li>
                 
                 <!-- Agendamentos - Todos os perfis -->
                 <li class="nav-item">

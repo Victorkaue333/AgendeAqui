@@ -31,6 +31,24 @@ def _enqueue_booking_notification(agendamento_id, event):
     threading.Thread(target=_run, daemon=True).start()
 
 
+def _create_in_app_notification(usuario, *, titulo: str, mensagem: str, nivel: str = 'info', url: str = ''):
+    """Cria notificação in-app para o usuário sem quebrar o fluxo em caso de erro."""
+
+    try:
+        from notificacoes.models import Notificacao
+
+        Notificacao.objects.create(
+            usuario=usuario,
+            titulo=titulo,
+            mensagem=mensagem,
+            nivel=nivel,
+            url=url,
+        )
+    except Exception:
+        # Fail-safe: não bloquear aprovação/reprovação
+        pass
+
+
 # ============================================================================
 # DECORADORES E MIXINS PARA CONTROLE DE ACESSO
 # ============================================================================
@@ -302,6 +320,14 @@ class AgendamentoApproveView(CoordenadorRequiredMixin, DetailView):
             agendamento.status = 'A'
             agendamento.justificativa_reprovacao = ''
             agendamento.save()
+
+            _create_in_app_notification(
+                agendamento.usuario,
+                titulo='Agendamento aprovado',
+                mensagem=f'Seu agendamento #{agendamento.id} foi aprovado.',
+                nivel='success',
+                url=reverse('agendamentos:detail', args=[agendamento.id]),
+            )
             
             # Enfileirar notificação em background (não bloquear)
             _enqueue_booking_notification(agendamento.id, 'approved')
@@ -332,6 +358,14 @@ class AgendamentoApproveView(CoordenadorRequiredMixin, DetailView):
             agendamento.status = 'R'
             agendamento.justificativa_reprovacao = justificativa
             agendamento.save()
+
+            _create_in_app_notification(
+                agendamento.usuario,
+                titulo='Agendamento reprovado',
+                mensagem=f'Seu agendamento #{agendamento.id} foi reprovado. Justificativa: {justificativa}',
+                nivel='danger',
+                url=reverse('agendamentos:detail', args=[agendamento.id]),
+            )
             
             # Enfileirar notificação em background (não bloquear)
             _enqueue_booking_notification(agendamento.id, 'rejected')
