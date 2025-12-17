@@ -681,9 +681,9 @@
                     </a>
                 </li>
                 
-                <!-- Dashboard - Apenas Coordenador e Admin -->
+                <!-- Dashboard - Apenas Admin -->
                 {% if request.user.is_authenticated and request.user.perfil %}
-                    {% if request.user.perfil.tipo == 'COO' or request.user.perfil.tipo == 'ADM' %}
+                    {% if request.user.perfil.tipo == 'ADM' %}
                     <li class="nav-item">
                         <a href="{% url 'dashboard:home' %}" class="nav-link-custom {% if 'dashboard' in request.path %}active{% endif %}">
                             <i class="fas fa-chart-line"></i>
@@ -726,9 +726,9 @@
                     {% endif %}
                 {% endif %}
                 
-                <!-- Relatórios - Apenas Coordenador e Admin -->
+                <!-- Relatórios - Apenas Admin -->
                 {% if request.user.is_authenticated and request.user.perfil %}
-                    {% if request.user.perfil.tipo == 'COO' or request.user.perfil.tipo == 'ADM' %}
+                    {% if request.user.perfil.tipo == 'ADM' %}
                     <li class="nav-item">
                         <a href="{% url 'relatorios:index' %}" class="nav-link-custom {% if 'relatorios' in request.path %}active{% endif %}">
                             <i class="fas fa-chart-pie"></i>

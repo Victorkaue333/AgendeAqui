@@ -164,9 +164,9 @@
 
     <!-- Grid de Cards -->
     <div class="acesso-rapido-grid">
-        <!-- Dashboard - Apenas Coordenador e Admin -->
+        <!-- Dashboard - Apenas Admin -->
         {% if request.user.is_authenticated and request.user.perfil %}
-            {% if request.user.perfil.tipo == 'COO' or request.user.perfil.tipo == 'ADM' %}
+            {% if request.user.perfil.tipo == 'ADM' %}
             <a href="{% url 'dashboard:home' %}" class="acesso-card">
                 <div class="card-icon">
                     <i class="fas fa-chart-line"></i>
@@ -207,9 +207,9 @@
             {% endif %}
         {% endif %}
 
-        <!-- Relatórios - Apenas Coordenador e Admin -->
+        <!-- Relatórios - Apenas Admin -->
         {% if request.user.is_authenticated and request.user.perfil %}
-            {% if request.user.perfil.tipo == 'COO' or request.user.perfil.tipo == 'ADM' %}
+            {% if request.user.perfil.tipo == 'ADM' %}
             <a href="{% url 'relatorios:index' %}" class="acesso-card">
                 <div class="card-icon">
                     <i class="fas fa-chart-bar"></i>
@@ -232,7 +232,7 @@
         <!-- Sair -->
         <a href="{% url 'logout' %}" class="acesso-card">
             <div class="card-icon">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="fas fa-right-from-bracket"></i>
             </div>
             <h3 class="card-title">Sair</h3>
         
