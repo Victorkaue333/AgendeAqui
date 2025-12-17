@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from agendamentos.models import Agendamento
 from administracao.models import Perfil, AuditLog
 from .forms import UserRegistrationForm, AlterarPerfilForm, CriarUsuarioForm
@@ -101,7 +102,7 @@ def perfil(request):
             request.user.save()
             messages.success(request, 'Dados atualizados com sucesso!')
         
-        return redirect('usuarios:perfil')
+        return HttpResponseRedirect(reverse('usuarios:perfil'))
     
     context = {
         'historico_agendamentos': historico_agendamentos,

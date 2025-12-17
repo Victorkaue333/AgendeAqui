@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - AgendeAqui{% endblock %}
 
@@ -205,6 +206,36 @@
 
     .field-error { color: #dc2626; font-size: 0.8rem; margin-top: 4px; }
 
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .password-input-wrapper input {
+        padding-right: 3rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+        z-index: 10;
+    }
+
+    .toggle-password:hover {
+        color: #3b4cca;
+    }
+
     @keyframes slideUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -273,10 +304,8 @@
     <div class="login-card">
         <div class="login-left">
             <div class="icon-brand">
-                <i class="fas fa-calendar-alt"></i>
+                <img src="{% static 'imgs/logotipo.png' %}" alt="AgendeAqui" style="width: 300px; height: 300px; object-fit: contain;">
             </div>
-            <div class="system-title">AgendeAqui</div>
-            <div class="system-desc">Sistema de Agendamento de Salas e Recursos</div>
             <div class="system-info">
                 Acesse sua conta para gerenciar suas reservas e horários.
             </div>
@@ -319,8 +348,11 @@
                         <i class="fas fa-lock"></i>
                         <label for="id_password">Senha</label>
                     </div>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper password-input-wrapper">
                         {{ form.password }}
+                        <button type="button" class="toggle-password" onclick="togglePassword('id_password')">
+                            <i class="fas fa-eye" id="id_password_icon"></i>
+                        </button>
                     </div>
                     {% if form.password.errors %}
                         <div class="field-error">{{ form.password.errors.0 }}</div>
@@ -369,5 +401,20 @@
         if(user) user.setAttribute('placeholder', 'Seu usuário');
         if(pass) pass.setAttribute('placeholder', 'Sua senha');
     });
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + '_icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
 </script>
 {% endblock %}

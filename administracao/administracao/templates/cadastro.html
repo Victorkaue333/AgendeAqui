@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Cadastro - AgendeAqui{% endblock %}
 
@@ -59,6 +60,11 @@
         font-size: 3rem;
         margin-bottom: 1rem;
         color: #fff;
+        transition: transform 0.3s ease;
+    }
+
+    .cadastro-left:hover .icon-brand {
+        transform: scale(1.1) rotate(-5deg);
     }
 
     .system-title { 
@@ -234,6 +240,36 @@
         margin-top: 4px; 
     }
 
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .password-input-wrapper input {
+        padding-right: 3rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+        z-index: 10;
+    }
+
+    .toggle-password:hover {
+        color: #3b4cca;
+    }
+
     @keyframes slideUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -306,10 +342,8 @@
     <div class="cadastro-card">
         <div class="cadastro-left">
             <div class="icon-brand">
-                <i class="fas fa-calendar-alt"></i>
+                <img src="{% static 'imgs/logotipo.png' %}" alt="AgendeAqui" style="width: 300px; height: 300px; object-fit: contain;">
             </div>
-            <div class="system-title">AgendeAqui</div>
-            <div class="system-desc">Organize reservas, otimize espaços e facilite a gestão acadêmica em um só lugar.</div>
             <div class="secure-badge">
                 <i class="fas fa-lock"></i> Cadastro Seguro
             </div>
@@ -357,9 +391,12 @@
                         <i class="fas fa-lock"></i>
                         <label for="id_password1">Senha</label>
                     </div>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper password-input-wrapper">
                         <input type="password" name="password1" id="id_password1" class="form-control" 
                                autocomplete="new-password" required minlength="8">
+                        <button type="button" class="toggle-password" onclick="togglePassword('id_password1')">
+                            <i class="fas fa-eye" id="id_password1_icon"></i>
+                        </button>
                     </div>
                     {% if form.password1.errors %}
                         <div class="field-error">{{ form.password1.errors.0 }}</div>
@@ -372,9 +409,12 @@
                         <i class="fas fa-check-circle"></i>
                         <label for="id_password2">Confirmar Senha</label>
                     </div>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper password-input-wrapper">
                         <input type="password" name="password2" id="id_password2" class="form-control" 
                                autocomplete="new-password" required minlength="8">
+                        <button type="button" class="toggle-password" onclick="togglePassword('id_password2')">
+                            <i class="fas fa-eye" id="id_password2_icon"></i>
+                        </button>
                     </div>
                     {% if form.password2.errors %}
                         <div class="field-error">{{ form.password2.errors.0 }}</div>
@@ -528,6 +568,21 @@
             });
         });
     });
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + '_icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
 </script>
 
 {% endblock %}

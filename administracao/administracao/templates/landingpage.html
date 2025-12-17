@@ -157,7 +157,7 @@
 
     .hero-subtitle {
         font-size: 1.35rem; /* Aumentado */
-        color: var(--text-body); /* Cor mais clara */
+        color: #e2e8f0; /* Cor mais clara e vis\u00edvel */
         font-weight: 400;
         max-width: 750px;
         margin: 0 auto 2.5rem auto;
@@ -185,6 +185,7 @@
         text-decoration: none;
         position: relative;
         overflow: hidden;
+        display: inline-block !important;
     }
     
     .btn-hero-primary::before {
@@ -199,9 +200,10 @@
     }
     
     .btn-hero-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 8px 30px rgba(99, 102, 241, 0.6);
-        color: white;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 8px 30px rgba(99, 102, 241, 0.6) !important;
+        color: white !important;
+        background: #6366f1 !important;
     }
     
     .btn-hero-primary:hover::before {
@@ -262,6 +264,11 @@
         border-bottom: 1px solid var(--border);
         padding: 50px 0;
         background: rgba(0,0,0,0.3);
+    }
+    
+    .social-proof p {
+        color: #cbd5e1 !important;
+        opacity: 1 !important;
     }
     .logos-grid {
         display: flex;
@@ -429,7 +436,7 @@
     }
     .accordion-button::after { filter: invert(1) brightness(200%); opacity: 0.7; }
     .accordion-body { 
-        color: var(--text-muted); 
+        color: #e2e8f0 !important; 
         font-size: 1.1rem;
         padding: 0 0 30px 0; 
         line-height: 1.7;
@@ -444,8 +451,9 @@
         border-top: 1px solid var(--border);
         border-bottom: 1px solid var(--border);
     }
-    .final-cta h2 { color: white; font-size: 2.8rem; font-weight: 800; }
-    .final-cta p { color: var(--text-body); font-size: 1.3rem; }
+    .final-cta h2 { color: white; font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; }
+    .final-cta p { color: #e2e8f0 !important; font-size: 1.3rem; line-height: 1.6; margin-bottom: 2rem; }
+    .final-cta .small { color: #cbd5e1 !important; font-size: 1rem !important; margin-top: 1.5rem; opacity: 1 !important; }
 
     /* --- RESPONSIVIDADE --- */
     @media (max-width: 768px) {
@@ -463,10 +471,22 @@
     }
 
     /* Forçar textos "muted" para branco nesta landing page */
-    .text-muted { color: #ffffff !important; opacity: 1 !important; }
-    .final-cta .text-muted { color: #ffffff !important; }
+    .text-muted { color: #e2e8f0 !important; opacity: 1 !important; }
+    .final-cta .text-muted { color: #cbd5e1 !important; opacity: 1 !important; }
+    .social-proof .text-muted { color: #cbd5e1 !important; opacity: 1 !important; }
+    .step-card p { color: #e2e8f0 !important; }
+    .glass-card p { color: #e2e8f0 !important; }
+    .testimonial-card .small { color: #94a3b8 !important; }
+    .testimonial-card p { color: #e2e8f0 !important; }
     /* Garantir que mockup header URL não apareça apagado */
     .ui-mockup .mockup-header div:last-child { color: #ffffff !important; }
+    /* Garantir visibilidade de todos os parágrafos */
+    p { color: #e2e8f0; }
+    .section-header p { color: #cbd5e1 !important; }
+    
+    /* Ocultar qualquer input ou form indesejado na landing page */
+    .final-cta input, .final-cta textarea, .final-cta form { display: none !important; }
+    .hero-section input, .hero-section textarea, .hero-section form { display: none !important; }
 
     /* --- ANIMAÇÕES DE ENTRADA --- */
     @keyframes fadeInUp {
@@ -550,10 +570,7 @@
 <nav class="landing-navbar" id="navbar">
     <div class="container d-flex justify-content-between align-items-center">
         <a href="#" class="brand-logo">
-            <div style="width:36px; height:36px; background:#FF3333; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-calendar-alt" style="font-size:1rem;"></i>
-            </div>
-            AgendeAqui
+            <img src="{% static 'imgs/logotipo.png' %}" alt="AgendeAqui" style="width: 90px; height: 90px; object-fit: contain;">
         </a>
         
         <div class="nav-buttons d-none d-md-flex align-items-center">
